@@ -14,7 +14,7 @@ import Foundation
 	// MARK: - Setup / Teardown
 	let savePath = URL.documentsDirectory.appending(path: "CurrentWorkout")
 	
-	init() async throws {
+	@MainActor init() async throws {
 		if FileManager.default.fileExists(atPath: savePath.path) {
 			try FileManager.default.removeItem(at: savePath)
 		}

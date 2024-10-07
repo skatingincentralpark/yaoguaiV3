@@ -5,21 +5,16 @@
 //  Created by Charles Zhao on 22/8/2024.
 //
 
-import XCTest
+import Testing
 @testable import YaoguaiV3
 import SwiftData
+import Foundation
 
-final class WorkoutManagerTests: XCTestCase {
+@Suite("Workout Manager Tests") struct WorkoutManagerTests {
 	// MARK: - Setup / Teardown
 	let savePath = URL.documentsDirectory.appending(path: "CurrentWorkout")
 	
-	override func setUp() async throws {
-		if FileManager.default.fileExists(atPath: savePath.path) {
-			try FileManager.default.removeItem(at: savePath)
-		}
-	}
-	
-	override func tearDown() async throws {
+	init() async throws {
 		if FileManager.default.fileExists(atPath: savePath.path) {
 			try FileManager.default.removeItem(at: savePath)
 		}
@@ -28,8 +23,7 @@ final class WorkoutManagerTests: XCTestCase {
 	// MARK: - Tests
 	
 	//	Should initialise with no data
-	@MainActor
-	func testInitialise() async throws {
+	@MainActor @Test func testInitialise() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
@@ -40,15 +34,14 @@ final class WorkoutManagerTests: XCTestCase {
 		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
-		XCTAssertNil(currentWorkout, "Expected no current workout on initial load")
-		XCTAssertNil(currentWorkoutId, "Expected no current workout ID on initial load")
-		XCTAssertFalse(savedWorkoutExists, "Expected no saved workout file on initial load")
-		XCTAssertEqual(workoutRecordsInDB, 0, "Expected no workout records in the database on initial load")
+		try #require(currentWorkout == nil, "Expected no current workout on initial load")
+		try #require(currentWorkoutId == nil, "Expected no current workout ID on initial load")
+		try #require(!savedWorkoutExists, "Expected no saved workout file on initial load")
+		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database on initial load")
 	}
 	
 	//	Should be able to start a new workout
-	@MainActor
-	func testStartWorkout() async throws {
+	@MainActor @Test func testStartWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
@@ -60,21 +53,22 @@ final class WorkoutManagerTests: XCTestCase {
 		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
-		XCTAssertNotNil(newCurrentWorkout, "Expected current workout after starting a workout")
-		XCTAssertNotNil(newCurrentWorkoutId, "Expected current workout ID after starting a workout")
-		XCTAssertTrue(newSavedWorkoutExists, "Expected saved workout file after starting a workout")
-		XCTAssertEqual(workoutRecordsInDB, 1, "Expected 1 workout record in the database after starting a workout")
+		try #require(newCurrentWorkout != nil, "Expected a workout after starting a workout")
+		try #require(newCurrentWorkoutId != nil, "Expected a workout ID after starting a workout")
+		try #require(newSavedWorkoutExists, "Expected a saved workout file after starting a workout")
+		try #require(workoutRecordsInDB == 1, "Expected 1 workout record in the database after starting a workout")
+		
 	}
 	
 	// Starting a workout can restore an ongoing workout
-	@MainActor
-	func testRestoreWorkout() async throws {
+	@MainActor @Test func testRestoreWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
 		workoutManager.startNewWorkout()
 		guard let initialWorkoutId = workoutManager.currentWorkoutId else {
-			return XCTFail("No workoutId found.")
+			Issue.record("No workoutId found.") // not sure if this early returns, need to test!
+			return
 		}
 		
 		let newWorkoutManager = try await setup(with: container)
@@ -86,16 +80,15 @@ final class WorkoutManagerTests: XCTestCase {
 		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
-		XCTAssertNotNil(currentWorkout, "Expected current workout after starting a workout")
-		XCTAssertNotNil(currentWorkoutId, "Expected current workout ID after starting a workout")
-		XCTAssertTrue(savedWorkoutExists, "Expected saved workout file after starting a workout")
-		XCTAssertEqual(workoutRecordsInDB, 1, "Expected 1 workout record in the database after starting a workout")
-		XCTAssertEqual(initialWorkoutId, currentWorkoutId, "Expected the initial and current workoutId to be the same")
+		try #require(currentWorkout != nil, "Expected current workout after starting a workout")
+		try #require(currentWorkoutId != nil, "Expected current workout ID after starting a workout")
+		try #require(savedWorkoutExists, "Expected saved workout file after starting a workout")
+		try #require(workoutRecordsInDB == 1, "Expected 1 workout record in the database after starting a workout")
+		try #require(initialWorkoutId == currentWorkoutId, "Expected the initial and current workoutId to be the same")
 	}
 	
 	// Should cancel a workout correctly and clean up
-	@MainActor
-	func testCancelWorkout() async throws {
+	@MainActor @Test func testCancelWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
@@ -107,15 +100,14 @@ final class WorkoutManagerTests: XCTestCase {
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
 		
-		XCTAssertNil(currentWorkout, "Expected no workout after canceling")
-		XCTAssertNil(currentWorkoutId, "Expected no current workout ID after canceling")
-		XCTAssertFalse(savedWorkoutExists, "Expected no saved workout file after canceling")
-		XCTAssertEqual(workoutRecordsInDB, 0, "Expected no workout record in the database after after canceling")
+		try #require(currentWorkout == nil, "Expected no workout after canceling")
+		try #require(currentWorkoutId == nil, "Expected no current workout ID after canceling")
+		try #require(!savedWorkoutExists, "Expected no saved workout file after canceling")
+		try #require(workoutRecordsInDB == 0, "Expected no workout record in the database after after canceling")
 	}
 	
 	// Should not restore a workout that's been cancelled
-	@MainActor
-	func testRestoreAfterCancelWorkout() async throws {
+	@MainActor @Test func testRestoreAfterCancelWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
@@ -131,15 +123,14 @@ final class WorkoutManagerTests: XCTestCase {
 		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
-		XCTAssertNil(currentWorkout, "Expected no workout after canceling")
-		XCTAssertNil(currentWorkoutId, "Expected no current workout ID after canceling")
-		XCTAssertFalse(savedWorkoutExists, "Expected no saved workout file after canceling")
-		XCTAssertEqual(workoutRecordsInDB, 0, "Expected no workout record in the database after after canceling")
+		try #require(currentWorkout == nil, "Expected no workout after canceling")
+		try #require(currentWorkoutId == nil, "Expected no current workout ID after canceling")
+		try #require(!savedWorkoutExists, "Expected no saved workout file after canceling")
+		try #require(workoutRecordsInDB == 0, "Expected no workout record in the database after after canceling")
 	}
 	
 	// Should save a workout if completed with a valid set
-	@MainActor
-	func testCompleteValidWorkout() async throws {
+	@MainActor @Test func testCompleteValidWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
@@ -163,16 +154,15 @@ final class WorkoutManagerTests: XCTestCase {
 		let exerciseRecordsInDB = try fetchModelCount(ofType: ExerciseRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
-		XCTAssertNil(workoutManager.currentWorkout, "Expected no workout after completing")
-		XCTAssertNil(workoutManager.currentWorkoutId, "Expected no current workout ID after completing")
-		XCTAssertFalse(savedWorkoutExists, "Expected no saved workout file after completing")
-		XCTAssertEqual(workoutRecordsInDB, 1, "Expected 1 workout record in the database after after completing")
-		XCTAssertEqual(exerciseRecordsInDB, 1, "Expected 1 exercise record in the database after after completing")
+		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
+		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
+		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
+		try #require(workoutRecordsInDB == 1, "Expected 1 workout record in the database after after completing")
+		try #require(exerciseRecordsInDB == 1, "Expected 1 exercise record in the database after after completing")
 	}
 	
 	// Should not save a workout if completed without a valid set
-	@MainActor
-	func testCompleteInvalidWorkout() async throws {
+	@MainActor @Test func testCompleteInvalidWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
@@ -184,15 +174,14 @@ final class WorkoutManagerTests: XCTestCase {
 		let workoutRecordsInDB = try container.mainContext.fetch(descriptor).count
 		
 		// Then: assert that the initial state is as expected
-		XCTAssertNil(workoutManager.currentWorkout, "Expected no workout after completing")
-		XCTAssertNil(workoutManager.currentWorkoutId, "Expected no current workout ID after completing")
-		XCTAssertFalse(savedWorkoutExists, "Expected no saved workout file after completing")
-		XCTAssertEqual(workoutRecordsInDB, 0, "Expected no workout records in the database after after completing")
+		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
+		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
+		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
+		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database after after completing")
 	}
 	
 	// Should delete all valid exercises if workout is cancelled
-	@MainActor
-	func testCancelValidWorkout() async throws {
+	@MainActor @Test func testCancelValidWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = try await setup(with: container)
 		
@@ -218,17 +207,15 @@ final class WorkoutManagerTests: XCTestCase {
 		let exerciseRecordsInDB = try workoutManager.modelContext.fetch(descriptorExerciseRecord).count
 		
 		// Then: assert that the initial state is as expected
-		XCTAssertNil(workoutManager.currentWorkout, "Expected no workout after canceling")
-		XCTAssertNil(workoutManager.currentWorkoutId, "Expected no current workout ID after canceling")
-		XCTAssertFalse(savedWorkoutExists, "Expected no saved workout file after canceling")
-		XCTAssertEqual(workoutRecordsInDB, 0, "Expected 0 workout records in the database after after canceling")
-		XCTAssertEqual(exerciseRecordsInDB, 0, "Expected 0 exercise records in the database after after canceling")
+		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
+		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
+		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
+		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database after after completing")
+		try #require(exerciseRecordsInDB == 0, "Expected 0 exercise records in the database after after canceling")
 	}
 	
-	@MainActor
-	func testAddDuplicateExercisesToWorkout() async throws {
+	@MainActor @Test func testAddDuplicateExercisesToWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
 		
 		let workoutRecord = WorkoutRecord()
 		let exercise = Exercise(name: "Burpees", category: .reps)
@@ -237,12 +224,11 @@ final class WorkoutManagerTests: XCTestCase {
 		workoutRecord.addExercise(details: exercise)
 		workoutRecord.addExercise(details: exercise)
 		
-		XCTAssertEqual(workoutRecord.exercises.count, 1, "Expected 1 exercise records after attempting to add duplicate")
+		try #require(workoutRecord.exercises.count == 1, "Expected 1 exercise records after attempting to add duplicate")
 	}
 	
 	// MARK: - Helper Functions
-	@MainActor
-	func createContainer() async throws -> ModelContainer {
+	@MainActor func createContainer() async throws -> ModelContainer {
 		let config = ModelConfiguration(isStoredInMemoryOnly: true)
 		let container = try ModelContainer(for: WorkoutRecord.self, configurations: config)
 		
@@ -259,8 +245,7 @@ final class WorkoutManagerTests: XCTestCase {
 		return container
 	}
 	
-	@MainActor
-	func setup(with container: ModelContainer) async throws -> CurrentWorkoutManager {
+	@MainActor func setup(with container: ModelContainer) async throws -> CurrentWorkoutManager {
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		return workoutManager
 	}

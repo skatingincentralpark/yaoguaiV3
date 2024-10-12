@@ -11,7 +11,6 @@ import Foundation
 @testable import YaoguaiV3
 
 @Suite("Current Workout Manager Tests") struct CurrentWorkoutManagerTests {
-	// MARK: - Setup / Teardown
 	let savePath = URL.documentsDirectory.appending(path: "CurrentWorkout")
 	
 	@MainActor init() async throws {
@@ -20,18 +19,16 @@ import Foundation
 		}
 	}
 	
-	// MARK: - Tests
-	
 	//	Should initialise with no data
 	@MainActor @Test func testInitialise() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		// When: the app starts and we check initial state
 		let currentWorkout = workoutManager.currentWorkout
 		let currentWorkoutId = workoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
 		try #require(currentWorkout == nil, "Expected no current workout on initial load")
@@ -43,14 +40,14 @@ import Foundation
 	//	Should be able to start a new workout
 	@MainActor @Test func testStartWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
 		
 		let newCurrentWorkout = workoutManager.currentWorkout
 		let newCurrentWorkoutId = workoutManager.currentWorkoutId
 		let newSavedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
 		try #require(newCurrentWorkout != nil, "Expected a workout after starting a workout")
@@ -63,7 +60,7 @@ import Foundation
 	// Starting a workout can restore an ongoing workout
 	@MainActor @Test func testRestoreWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
 		guard let initialWorkoutId = workoutManager.currentWorkoutId else {
@@ -71,13 +68,13 @@ import Foundation
 			return
 		}
 		
-		let newWorkoutManager = try await setup(with: container)
+		let newWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		let currentWorkout = newWorkoutManager.currentWorkout
 		let currentWorkoutId = newWorkoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		
-		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
 		try #require(currentWorkout != nil, "Expected current workout after starting a workout")
@@ -90,7 +87,7 @@ import Foundation
 	// Should cancel a workout correctly and clean up
 	@MainActor @Test func testCancelWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
 		workoutManager.cancel()
@@ -98,7 +95,7 @@ import Foundation
 		let currentWorkout = workoutManager.currentWorkout
 		let currentWorkoutId = workoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
 		
 		try #require(currentWorkout == nil, "Expected no workout after canceling")
 		try #require(currentWorkoutId == nil, "Expected no current workout ID after canceling")
@@ -109,18 +106,18 @@ import Foundation
 	// Should not restore a workout that's been cancelled
 	@MainActor @Test func testRestoreAfterCancelWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
 		workoutManager.cancel()
 		
-		let newWorkoutManager = try await setup(with: container)
+		let newWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		let currentWorkout = newWorkoutManager.currentWorkout
 		let currentWorkoutId = newWorkoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		
-		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
 		try #require(currentWorkout == nil, "Expected no workout after canceling")
@@ -132,7 +129,7 @@ import Foundation
 	// Should save a workout if completed with a valid set
 	@MainActor @Test func testCompleteValidWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
 		
@@ -150,8 +147,8 @@ import Foundation
 		workoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModelCount(ofType: WorkoutRecord.self, in: container.mainContext)
-		let exerciseRecordsInDB = try fetchModelCount(ofType: ExerciseRecord.self, in: container.mainContext)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
+		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
@@ -164,14 +161,13 @@ import Foundation
 	// Should not save a workout if completed without a valid set
 	@MainActor @Test func testCompleteInvalidWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
 		workoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let descriptor = FetchDescriptor<WorkoutRecord>(predicate: #Predicate { _ in true })
-		let workoutRecordsInDB = try container.mainContext.fetch(descriptor).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
@@ -183,7 +179,7 @@ import Foundation
 	// Should delete all valid exercises if workout is cancelled
 	@MainActor @Test func testCancelValidWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = try await setup(with: container)
+		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
 		
@@ -199,12 +195,8 @@ import Foundation
 		workoutManager.cancel()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let descriptor = FetchDescriptor<WorkoutRecord>(predicate: #Predicate { _ in true })
-		let workoutRecordsInDB = try workoutManager.modelContext.fetch(descriptor).count
-		
-		
-		let descriptorExerciseRecord = FetchDescriptor<ExerciseRecord>(predicate: #Predicate { _ in true })
-		let exerciseRecordsInDB = try workoutManager.modelContext.fetch(descriptorExerciseRecord).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
+		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
@@ -226,28 +218,27 @@ import Foundation
 		
 		try #require(workoutRecord.exercises.count == 1, "Expected 1 exercise records after attempting to add duplicate")
 	}
-	
-	// MARK: - Helper Functions
+}
+
+// Helpers moved to an extension for clarity
+private extension CurrentWorkoutManagerTests {
 	@MainActor func createContainer() async throws -> ModelContainer {
 		let config = ModelConfiguration(isStoredInMemoryOnly: true)
 		let container = try ModelContainer(for: WorkoutRecord.self, configurations: config)
 		
-		func addDummyExercises(in modelContext: ModelContext) {
+		func addDummyExercises(in modelContext: ModelContext) throws {
 			let pullups = Exercise(name: "Pullups", category: .weightAndReps)
 			let pushups = Exercise(name: "Pushups", category: .weightAndReps)
 			
 			modelContext.insert(pullups)
 			modelContext.insert(pushups)
+			
+			try modelContext.save()
 		}
 		
-		addDummyExercises(in: container.mainContext)
+		try addDummyExercises(in: container.mainContext)
 		
 		return container
-	}
-	
-	@MainActor func setup(with container: ModelContainer) async throws -> CurrentWorkoutManager {
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
-		return workoutManager
 	}
 	
 	func getExerciseDetail(from modelContext: ModelContext) throws -> Exercise {
@@ -257,8 +248,8 @@ import Foundation
 		return modelContext.model(for: id) as? Exercise ?? Exercise(name: "AUTO_GENERATED", category: .durationAndWeight)
 	}
 	
-	func fetchModelCount<T: PersistentModel>(ofType type: T.Type, in context: ModelContext) throws -> Int {
+	func fetchModel<T: PersistentModel>(ofType type: T.Type, in context: ModelContext) throws -> [T] {
 		let descriptor = FetchDescriptor<T>(predicate: #Predicate { _ in true })
-		return try context.fetch(descriptor).count
+		return try context.fetch(descriptor)
 	}
 }

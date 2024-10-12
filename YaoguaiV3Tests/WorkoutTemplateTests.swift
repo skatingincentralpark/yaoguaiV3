@@ -150,15 +150,17 @@ private extension WorkoutTemplateTests {
 		let config = ModelConfiguration(isStoredInMemoryOnly: true)
 		let container = try ModelContainer(for: WorkoutRecord.self, configurations: config)
 		
-		func addDummyExercises(in modelContext: ModelContext) {
+		func addDummyExercises(in modelContext: ModelContext) throws {
 			let pullups = Exercise(name: "Pullups", category: .weightAndReps)
 			let pushups = Exercise(name: "Pushups", category: .weightAndReps)
 			
 			modelContext.insert(pullups)
 			modelContext.insert(pushups)
+			
+			try modelContext.save()
 		}
 		
-		addDummyExercises(in: container.mainContext)
+		try addDummyExercises(in: container.mainContext)
 		
 		return container
 	}

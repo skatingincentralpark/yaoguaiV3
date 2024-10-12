@@ -6,11 +6,11 @@
 //
 
 import Testing
-@testable import YaoguaiV3
 import SwiftData
 import Foundation
+@testable import YaoguaiV3
 
-@Suite("Workout Manager Tests") struct WorkoutManagerTests {
+@Suite("Current Workout Manager Tests") struct CurrentWorkoutManagerTests {
 	// MARK: - Setup / Teardown
 	let savePath = URL.documentsDirectory.appending(path: "CurrentWorkout")
 	

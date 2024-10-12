@@ -107,12 +107,22 @@ extension WorkoutTemplateEditorWrapper {
 		
 		func saveExistingWorkout() {
 			if modelContext.hasChanges {
+				if workout.name.isEmpty {
+					alertManager.addAlert("Didn't save, name can't be empty", type: .warning)
+					return
+				}
+				
+				if workout.exercises.count == 0 {
+					alertManager.addAlert("Didn't save, exercises can't be empty", type: .warning)
+					return
+				}
+				
 				try? modelContext.save()
 			}
 		}
 		
 		func deleteExistingWorkout() {
-			/// I think we have to explicitly delete the child exercises as we're in a nested context...
+			alertManager.addAlert("Deleting existing workout template", type: .info)
 			try? modelContext.transaction {
 				workout.exercises.forEach { exercise in
 					modelContext.delete(exercise)
@@ -125,17 +135,16 @@ extension WorkoutTemplateEditorWrapper {
 		func cancelNewWorkout() {
 			alertManager.addAlert("Cancelling new workout template", type: .info)
 			try? modelContext.transaction {
-				modelContext.delete(workout)
-				
-				// Although these will be cascade deleted, it won't happen immediately, XCTest assertions fail
 				workout.exercises.forEach { template in
 					modelContext.delete(template)
 				}
+				
+				modelContext.delete(workout)
 			}
 		}
 		
 		func completeNewWorkout() {
-			alertManager.addAlert("Attempting to save", type: .info)
+			alertManager.addAlert("Attempting to complete adding new workout template", type: .info)
 			
 			if workout.name.isEmpty {
 				alertManager.addAlert("Didn't save, name can't be empty", type: .warning)

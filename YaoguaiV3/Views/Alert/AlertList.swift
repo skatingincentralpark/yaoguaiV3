@@ -13,7 +13,7 @@ struct AlertList: View {
 	var body: some View {
 		VStack {
 			ForEach(alertManager.alerts) { alert in
-				let index = alertManager.alerts.firstIndex(where: { $0.id == alert.id }) ?? 0
+//				let index = alertManager.alerts.firstIndex(where: { $0.id == alert.id }) ?? 0
 				
 				HStack {
 					Image(systemName: alert.type.icon) // Use icon from ToastType

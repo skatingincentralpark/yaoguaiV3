@@ -71,8 +71,8 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 				rootView: NumericKeyboardView(
 					insertText: { newText in
 						if let selectedTextRange = textField.selectedTextRange {
-							var currentText = textField.text ?? ""
-							var valueIsDouble = V("1") is Double
+							let currentText = textField.text ?? ""
+							let valueIsDouble = V("1") is Double
 
 							if valueIsDouble {
 								if newText == "." {

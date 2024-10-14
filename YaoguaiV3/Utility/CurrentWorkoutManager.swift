@@ -109,6 +109,15 @@ final class CurrentWorkoutManager {
 		guard let currentExercises = currentWorkout?.exercises else { return }
 		guard let currentWorkout else { return }
 		
+		/// Ensures complete is toggled on for all valid sets
+		currentExercises.enumerated().forEach({ idx, exercise in
+			currentWorkout.exercises[idx].sets.enumerated().forEach({ setIdx, setRecord in
+				if !setRecord.complete && setRecord.isValid {
+					currentExercises[idx].sets[setIdx].toggleComplete()
+				}
+			})
+		})
+		
 		/// For all exercises, filter out any sets that haven't been completed
 		currentExercises.enumerated().forEach({ idx, exercise in
 			currentExercises[idx].sets = currentExercises[idx].sets.filter({ setRecord in
@@ -139,7 +148,7 @@ final class CurrentWorkoutManager {
 				record.details?.latestRecord = record
 			}
 		}
-		
+
 		self.currentWorkoutId = nil
 		self.currentWorkout = nil
 		

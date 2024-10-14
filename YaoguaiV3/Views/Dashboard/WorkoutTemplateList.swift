@@ -14,6 +14,7 @@ struct WorkoutTemplateList: View {
 	@State var newTemplate: WorkoutTemplate? = nil
 	@State var templateBeingEdited: WorkoutTemplate? = nil
 	let alertManager = AlertManager.shared
+	var onTemplateTap: (WorkoutTemplate) -> Void = { _ in }
 	
 	var body: some View {
 		NavigationStack() {
@@ -23,16 +24,6 @@ struct WorkoutTemplateList: View {
 				try? modelContext.save()
 				newTemplate = template
 			}
-//			.onChange(of: newTemplate, { oldValue, newValue in
-//				if newValue == nil {
-//					if let oldValue {
-//						if oldValue.name.isEmpty || oldValue.exercises.count == 0 {
-//							alertManager.addAlert("Deleting new template because it's empty", type: .warning)
-//							modelContext.delete(oldValue)
-//						}
-//					}
-//				}
-//			})
 			.sheet(item: $newTemplate) { template in
 				NavigationStack {
 					WorkoutTemplateEditorWrapper(workoutId: template.id, in: modelContext.container, isNewWorkout: true)
@@ -48,13 +39,19 @@ struct WorkoutTemplateList: View {
 		ForEach(workoutTemplates) { template in
 			HStack(spacing: 20) {
 				Button(template.name) {
-					templateBeingEdited = template
+					onTemplateTap(template)
 				}
 				.swipeActions(edge: .trailing, allowsFullSwipe: true) {
 					Button("Delete") {
 						modelContext.delete(template)
 					}
 					.tint(.red)
+				}
+				.swipeActions {
+					Button("Edit") {
+						templateBeingEdited = template
+					}
+					.tint(.yellow)
 				}
 			}
 		}

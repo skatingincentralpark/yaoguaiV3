@@ -76,8 +76,12 @@ struct Dashboard: View {
 					Label("Swipe left to edit/delete", systemImage: "arrow.left.to.line.compact")
 				}
 				
-				Section {
-					WorkoutTemplateList()
+				Section {					
+					WorkoutTemplateList(onTemplateTap: { template in
+						workoutManager.startNewWorkout(from: template)
+						newWorkoutSheetShowing.toggle()
+					})
+					.disabled(workoutManager.currentWorkout != nil)
 				} header: {
 					Text("Templates")
 				} footer: {

@@ -163,18 +163,37 @@ final class CurrentWorkoutManager {
 	}
 	
 	@MainActor
-	func startNewWorkout() {
-		alertManager.addAlert("Starting new workout", type: .info)
+	func startNewWorkout(from template: WorkoutTemplate? = nil) {
+		var newRecord: WorkoutRecord?
 		
-		let newWorkout = WorkoutRecord(name: "New Workout")
-		modelContext.insert(newWorkout)
+		if let template {
+			alertManager.addAlert("Starting new workout from template", type: .info)
+			let workoutRecord = WorkoutRecord(name: template.name)
+			template.exercises.forEach { exerciseTemplate in
+				if let details = exerciseTemplate.details {
+					workoutRecord.addExercise(details: details)
+					
+					let sets = exerciseTemplate.sets.map { SetRecord(category: $0.category) }
+					
+					workoutRecord.exercises.last?.sets.append(contentsOf: sets)
+				}
+			}
+			newRecord = workoutRecord
+		} else {
+			alertManager.addAlert("Starting new workout", type: .info)
+			let newWorkout = WorkoutRecord(name: "New Workout")
+			newRecord = newWorkout
+		}
 		
-		/// Need to call save here to guarantee it's saved, otherwise, we could have an ID with no actual workout
+		guard let newRecord else {
+			alertManager.addAlert("Failed to start new workout", type: .error)
+			return
+		}
+		
+		// Need to call save here to guarantee it's saved, otherwise, we could have an ID with no actual workout
+		modelContext.insert(newRecord)
 		try? modelContext.save()
-		
-		/// Before I needed a Task is for visual bug when currentWorkout is used to display a sheet
-		/// Forces code to run on next runloop, similar to process.nextTick
-		currentWorkout = newWorkout
+		currentWorkout = newRecord
 	}
 	
 }

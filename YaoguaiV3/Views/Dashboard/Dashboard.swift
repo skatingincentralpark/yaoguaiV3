@@ -93,8 +93,6 @@ struct Dashboard: View {
 			.sheet(isPresented: $newWorkoutSheetShowing) {
 				if let workout = workoutManager.currentWorkout {
 					WorkoutRecordEditorWrapper(workoutId: workout.id, in: modelContext.container, isNewWorkout: true)
-				} else {
-					Text("Loading...")
 				}
 			}
 		}

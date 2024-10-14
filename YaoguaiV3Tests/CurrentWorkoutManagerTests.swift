@@ -10,13 +10,21 @@ import SwiftData
 import Foundation
 @testable import YaoguaiV3
 
-@Suite("Current Workout Manager Tests") struct CurrentWorkoutManagerTests {
+@Suite("Current Workout Manager Tests") final class CurrentWorkoutManagerTests {
 	let savePath = URL.documentsDirectory.appending(path: "CurrentWorkout")
 	
 	@MainActor init() async throws {
 		if FileManager.default.fileExists(atPath: savePath.path) {
 			try FileManager.default.removeItem(at: savePath)
 		}
+	}
+	
+	deinit {
+		do {
+			if FileManager.default.fileExists(atPath: savePath.path) {
+				try FileManager.default.removeItem(at: savePath)
+			}
+		} catch {}
 	}
 	
 	//	Should initialise with no data

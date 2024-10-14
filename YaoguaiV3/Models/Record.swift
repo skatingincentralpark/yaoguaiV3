@@ -77,6 +77,7 @@ struct SetRecord: SetCommon {
 	var details: Exercise?
 	var workout: WorkoutRecord?
 	var sets: [SetRecord] = []
+	var order: Int = 0
 	
 	init() {}
 }

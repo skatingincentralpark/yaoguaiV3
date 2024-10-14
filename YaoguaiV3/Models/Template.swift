@@ -28,6 +28,7 @@ struct SetTemplate: SetCommon {
 	var details: Exercise?
 	var workout: WorkoutTemplate?
 	var sets: [SetTemplate] = []
+	var order: Int = 0
 	
 	init() {}
 }

@@ -47,7 +47,7 @@ extension WorkoutCommon {
 	}
 	
 	var orderedExercises: [ExerciseType] {
-		exercises.sorted(by: { $0.created < $1.created })
+		exercises.sorted(by: { $0.order < $1.order })
 	}
 }
 
@@ -82,6 +82,7 @@ protocol ExerciseCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	var details: Exercise? { get set }
 	var workout: (WorkoutType)? { get set }
 	var sets: [SetType] { get set }
+	var order: Int { get set }
 	
 	func addSet()
 	func removeSet(_ set: SetType)

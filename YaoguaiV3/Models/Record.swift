@@ -49,7 +49,9 @@ struct SetRecord: SetCommon {
 		if isValid {
 			complete.toggle()
 		} else {
-			AlertManager.shared.addAlert("Didn't toggle complete because invalid", type: .warning)
+			Task { @MainActor in
+				AlertManager.shared.addAlert("Didn't toggle complete because invalid", type: .warning)
+			}
 		}
 	}
 	

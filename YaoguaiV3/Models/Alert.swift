@@ -48,7 +48,7 @@ struct Alert: Identifiable {
 	var type: AlertType
 }
 
-@Observable
+@Observable @MainActor
 class AlertManager {
 	static let shared = AlertManager()
 	private(set) var alerts: [Alert] = []
@@ -58,16 +58,9 @@ class AlertManager {
 		let newAlert = Alert(message: message, type: type)
 		alerts.append(newAlert)
 		
-		// Use a background task to handle the delay and dismissal
-		Task {
-			// Simulating a background operation
-			try? await Task.sleep(nanoseconds: 2_000_000_000) // Wait for 2 seconds
-			
-			// Switch back to the main thread for UI updates
-			await MainActor.run {
-				withAnimation {
-					self.removeAlert(newAlert) // Remove alert safely on the main thread
-				}
+		DispatchQueue.main.asyncAfter(deadline: .now() + (2)) {
+			withAnimation {
+				self.removeAlert(newAlert)
 			}
 		}
 	}

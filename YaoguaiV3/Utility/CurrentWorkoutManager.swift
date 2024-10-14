@@ -10,7 +10,7 @@ import SwiftData
 import SwiftUI
 import Observation
 
-@Observable
+@Observable @MainActor
 final class CurrentWorkoutManager {
 	private(set) var modelContext: ModelContext
 	private(set) var currentWorkoutId: PersistentIdentifier? {
@@ -28,7 +28,6 @@ final class CurrentWorkoutManager {
 	
 	let savePath = URL.documentsDirectory.appending(path: "CurrentWorkout")
 	
-	@MainActor
 	init(modelContext: ModelContext) {
 		self.modelContext = modelContext
 		self.startTime = Date()
@@ -42,7 +41,6 @@ final class CurrentWorkoutManager {
 }
 
 extension CurrentWorkoutManager {
-	@MainActor
 	private func loadCurrentWorkoutFromFile() {
 		/// Need to early return if we're in preview otherwise I get FatalError "Failed to create a managed objectID"
 		if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
@@ -84,7 +82,6 @@ extension CurrentWorkoutManager {
 }
 
 extension CurrentWorkoutManager {
-	@MainActor
 	public func cancel() {
 	if let currentWorkout {
 		try? modelContext.transaction {
@@ -107,7 +104,6 @@ extension CurrentWorkoutManager {
 	}
 }
 	
-	@MainActor
 	public func complete() {
 		alertManager.addAlert("Completing workout", type: .info)
 		guard let currentExercises = currentWorkout?.exercises else { return }
@@ -166,7 +162,6 @@ extension CurrentWorkoutManager {
 		}
 	}
 	
-	@MainActor
 	public func start(from template: WorkoutTemplate? = nil) {
 		var newRecord: WorkoutRecord?
 		

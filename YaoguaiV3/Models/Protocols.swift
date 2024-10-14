@@ -29,7 +29,9 @@ extension WorkoutCommon {
 			
 			/// We don't need to print warning if in test environment
 			if ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil {
-				AlertManager.shared.addAlert("Cannot add duplicate exercises to the workout", type: .warning)
+				Task { @MainActor in
+					AlertManager.shared.addAlert("Cannot add duplicate exercises to the workout", type: .warning)
+				}
 			}
 			
 			return

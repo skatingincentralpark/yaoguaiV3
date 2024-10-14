@@ -88,7 +88,7 @@ struct WorkoutTemplateEditorWrapper: View {
 }
 
 extension WorkoutTemplateEditorWrapper {
-	@Observable
+	@Observable @MainActor
 	class ViewModel {
 		var workout: WorkoutTemplate
 		let modelContext: ModelContext

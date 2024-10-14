@@ -46,3 +46,8 @@ struct UnitMassTextField: View {
 		return Measurement(value: double, unit: .kilograms)
 	}
 }
+
+#Preview(traits: .sizeThatFitsLayout) {
+	let m = Measurement<UnitMass>(value: 20.0, unit: .kilograms)
+	UnitMassTextField(value: .constant(m))
+}

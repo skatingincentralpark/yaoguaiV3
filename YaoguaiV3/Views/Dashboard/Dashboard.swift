@@ -10,7 +10,7 @@ import SwiftData
 
 struct Dashboard: View {
 	@Environment(\.modelContext) private var modelContext
-	@Environment(CurrentWorkoutManager.self) private var workoutManager
+	@Environment(CurrentWorkoutManager.self) private var currentWorkoutManager
 	let alertManager = AlertManager.shared
 	
 	@State var newWorkoutSheetShowing = false
@@ -58,13 +58,13 @@ struct Dashboard: View {
 				}
 				
 				Section {
-					if workoutManager.currentWorkout != nil {
+					if currentWorkoutManager.currentWorkout != nil {
 						Button("Continue Workout"){
 							newWorkoutSheetShowing.toggle()
 						}
 					} else {
 						Button("Start New Workout") {
-							workoutManager.startNewWorkout()
+							currentWorkoutManager.start()
 							newWorkoutSheetShowing.toggle()
 						}
 					}
@@ -78,10 +78,10 @@ struct Dashboard: View {
 				
 				Section {					
 					WorkoutTemplateList(onTemplateTap: { template in
-						workoutManager.startNewWorkout(from: template)
+						currentWorkoutManager.start(from: template)
 						newWorkoutSheetShowing.toggle()
 					})
-					.disabled(workoutManager.currentWorkout != nil)
+					.disabled(currentWorkoutManager.currentWorkout != nil)
 				} header: {
 					Text("Templates")
 				} footer: {
@@ -91,7 +91,7 @@ struct Dashboard: View {
 				
 			}
 			.sheet(isPresented: $newWorkoutSheetShowing) {
-				if let workout = workoutManager.currentWorkout {
+				if let workout = currentWorkoutManager.currentWorkout {
 					WorkoutRecordEditorWrapper(workoutId: workout.id, in: modelContext.container, isNewWorkout: true)
 				}
 			}
@@ -109,14 +109,14 @@ struct Dashboard: View {
 
 #Preview {
 	do {
-		let (container, workoutManager) = try setupPreview()
+		let (container, currentWorkoutManager) = try setupPreview()
 		
 		return Dashboard()
 			.overlay(alignment: .bottom) {
 				AlertList()
 			}
 			.modelContainer(container)
-			.environment(workoutManager)
+			.environment(currentWorkoutManager)
 	} catch {
 		return Text("Failed to build preview")
 	}

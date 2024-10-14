@@ -29,11 +29,11 @@ import Foundation
 	
 	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldStartEmpty() async throws {
 		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		// When: the app starts and we check initial state
-		let currentWorkout = workoutManager.currentWorkout
-		let currentWorkoutId = workoutManager.currentWorkoutId
+		let currentWorkout = currentWorkoutManager.currentWorkout
+		let currentWorkoutId = currentWorkoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		let verificationContext = ModelContext(container)
 		let fetchedWorkoutRecords = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
@@ -47,12 +47,12 @@ import Foundation
 	
 	@MainActor @Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToStorageAndFileSystem() async throws {
 		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
-		workoutManager.startNewWorkout()
+		currentWorkoutManager.start()
 		
-		let newCurrentWorkout = workoutManager.currentWorkout
-		let newCurrentWorkoutId = workoutManager.currentWorkoutId
+		let newCurrentWorkout = currentWorkoutManager.currentWorkout
+		let newCurrentWorkoutId = currentWorkoutManager.currentWorkoutId
 		let newSavedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		let verificationContext = ModelContext(container)
 		let fetchedWorkoutRecords = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
@@ -67,11 +67,11 @@ import Foundation
 	
 	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldRestoreCurrentWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
-		workoutManager.startNewWorkout()
+		currentWorkoutManager.start()
 		
-		guard let initialWorkoutId = workoutManager.currentWorkoutId else {
+		guard let initialWorkoutId = currentWorkoutManager.currentWorkoutId else {
 			Issue.record("No workoutId found.")
 			return
 		}
@@ -94,10 +94,10 @@ import Foundation
 	
 	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldNotRestoreCancelledWorkout() async throws {
 		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
-		workoutManager.startNewWorkout()
-		workoutManager.cancel()
+		currentWorkoutManager.start()
+		currentWorkoutManager.cancel()
 		
 		let newWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -117,9 +117,9 @@ import Foundation
 	
 	@MainActor @Test func test_currentWorkoutManagerComplete_shouldSaveValidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
 		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
-		workoutManager.startNewWorkout()
+		currentWorkoutManager.start()
 		
 		let exerciseRecord = ExerciseRecord()
 		exerciseRecord.details = try getExerciseDetail(from: container.mainContext)
@@ -130,9 +130,9 @@ import Foundation
 		exerciseRecord.sets[0].rpe = 1
 		exerciseRecord.sets[0].toggleComplete()
 		
-		workoutManager.currentWorkout?.exercises.append(exerciseRecord)
+		currentWorkoutManager.currentWorkout?.exercises.append(exerciseRecord)
 		
-		workoutManager.complete()
+		currentWorkoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		let verificationContext = ModelContext(container)
@@ -140,8 +140,8 @@ import Foundation
 		let fetchedExerciseRecords = try fetchModel(ofType: ExerciseRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
-		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
-		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
+		try #require(currentWorkoutManager.currentWorkout == nil, "Expected no workout after completing")
+		try #require(currentWorkoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
 		try #require(fetchedWorkoutRecords.count == 1, "Expected 1 workout record in the database after after completing")
 		try #require(fetchedExerciseRecords.count == 1, "Expected 1 exercise record in the database after after completing")
@@ -150,27 +150,27 @@ import Foundation
 	
 	@MainActor @Test func test_currentWorkoutManagerComplete_shouldNotSaveInvalidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
 		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
-		workoutManager.startNewWorkout()
-		workoutManager.complete()
+		currentWorkoutManager.start()
+		currentWorkoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		let verificationContext = ModelContext(container)
 		let fetchedWorkoutRecords = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
-		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
-		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
+		try #require(currentWorkoutManager.currentWorkout == nil, "Expected no workout after completing")
+		try #require(currentWorkoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout records in the database after after completing")
 	}
 	
 	@MainActor @Test func test_currentWorkoutManagerCancel_shouldDeleteFromStorageAndFileSystem() async throws {
 		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
-		workoutManager.startNewWorkout()
+		currentWorkoutManager.start()
 		
 		let exerciseRecord = ExerciseRecord()
 		exerciseRecord.details = try getExerciseDetail(from: container.mainContext)
@@ -179,9 +179,9 @@ import Foundation
 		exerciseRecord.sets[0].reps = 1
 		exerciseRecord.sets[0].rpe = 1
 		exerciseRecord.sets[0].toggleComplete()
-		workoutManager.currentWorkout?.exercises.append(exerciseRecord)
+		currentWorkoutManager.currentWorkout?.exercises.append(exerciseRecord)
 		
-		workoutManager.cancel()
+		currentWorkoutManager.cancel()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		let verificationContext = ModelContext(container)
@@ -189,8 +189,8 @@ import Foundation
 		let fetchedExerciseRecords = try fetchModel(ofType: ExerciseRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
-		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
-		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
+		try #require(currentWorkoutManager.currentWorkout == nil, "Expected no workout after completing")
+		try #require(currentWorkoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout records in the database after after completing")
 		try #require(fetchedExerciseRecords.count == 0, "Expected 0 exercise records in the database after after canceling")

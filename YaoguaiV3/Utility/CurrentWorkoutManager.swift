@@ -15,7 +15,7 @@ final class CurrentWorkoutManager {
 	private(set) var modelContext: ModelContext
 	private(set) var currentWorkoutId: PersistentIdentifier? {
 		didSet {
-			save()
+			saveCurrentWorkoutIdToFile()
 		}
 	}
 	private(set) var currentWorkout: WorkoutRecord? {
@@ -37,11 +37,13 @@ final class CurrentWorkoutManager {
 			return
 		}
 		
-		loadCurrentWorkout()
+		loadCurrentWorkoutFromFile()
 	}
-	
+}
+
+extension CurrentWorkoutManager {
 	@MainActor
-	func loadCurrentWorkout() {
+	private func loadCurrentWorkoutFromFile() {
 		/// Need to early return if we're in preview otherwise I get FatalError "Failed to create a managed objectID"
 		if ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1" {
 			return
@@ -69,7 +71,7 @@ final class CurrentWorkoutManager {
 		}
 	}
 	
-	private func save() {
+	private func saveCurrentWorkoutIdToFile() {
 		if let currentWorkoutId {
 			do {
 				let data = try JSONEncoder().encode(currentWorkoutId)
@@ -79,32 +81,34 @@ final class CurrentWorkoutManager {
 			}
 		}
 	}
-	
+}
+
+extension CurrentWorkoutManager {
 	@MainActor
-	func cancel() {
-		if let currentWorkout {
-			try? modelContext.transaction {
-				modelContext.delete(currentWorkout)
-				
-				// Although these will be cascade deleted, it won't happen immediately, XCTest assertions fail
-				currentWorkout.exercises.forEach { record in
-					modelContext.delete(record)
-				}
+	public func cancel() {
+	if let currentWorkout {
+		try? modelContext.transaction {
+			modelContext.delete(currentWorkout)
+			
+			// Although these will be cascade deleted, it won't happen immediately, XCTest assertions fail
+			currentWorkout.exercises.forEach { record in
+				modelContext.delete(record)
 			}
-		}
-		
-		self.currentWorkoutId = nil
-		self.currentWorkout = nil
-		
-		do {
-			try FileManager.default.removeItem(at: savePath)
-		} catch {
-			alertManager.addAlert("Unable to delete saved workout file. \(error.localizedDescription)", type: .error)
 		}
 	}
 	
+	self.currentWorkoutId = nil
+	self.currentWorkout = nil
+	
+	do {
+		try FileManager.default.removeItem(at: savePath)
+	} catch {
+		alertManager.addAlert("Unable to delete saved workout file. \(error.localizedDescription)", type: .error)
+	}
+}
+	
 	@MainActor
-	func complete() {
+	public func complete() {
 		alertManager.addAlert("Completing workout", type: .info)
 		guard let currentExercises = currentWorkout?.exercises else { return }
 		guard let currentWorkout else { return }
@@ -163,7 +167,7 @@ final class CurrentWorkoutManager {
 	}
 	
 	@MainActor
-	func startNewWorkout(from template: WorkoutTemplate? = nil) {
+	public func start(from template: WorkoutTemplate? = nil) {
 		var newRecord: WorkoutRecord?
 		
 		if let template {
@@ -195,5 +199,4 @@ final class CurrentWorkoutManager {
 		try? modelContext.save()
 		currentWorkout = newRecord
 	}
-	
 }

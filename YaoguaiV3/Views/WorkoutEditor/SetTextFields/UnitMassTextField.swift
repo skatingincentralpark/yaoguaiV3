@@ -14,16 +14,10 @@ struct UnitMassTextField: View {
 		SimpleTextFieldV2(
 			value: Binding(
 				get: {
-					if let value {
-						doubleFromMeasurement(value)
-					} else {
-						nil
-					}
+					doubleFromMeasurement(value)
 				},
 				set: { newValue in
-					if let newValue {
-						value = measurementFromDouble(newValue)
-					}
+					value = measurementFromDouble(newValue)
 				}
 			),
 			id: UUID().hashValue
@@ -31,17 +25,19 @@ struct UnitMassTextField: View {
     }
 	
 	// Convert Measurement<UnitMass> to Double for TextField
-	private func doubleFromMeasurement(_ measurement: Measurement<UnitMass>?) -> Double {
-		// If the measurement is nil, return 0.0 as the default
+	private func doubleFromMeasurement(_ measurement: Measurement<UnitMass>?) -> Double? {
 		guard let measurement = measurement else {
-			return 0.0
+			return nil
 		}
 		// Convert the measurement to kilograms and return the double value
 		return measurement.converted(to: .kilograms).value
 	}
 	
 	// Convert Double back to Measurement<UnitMass>
-	private func measurementFromDouble(_ double: Double) -> Measurement<UnitMass>? {
+	private func measurementFromDouble(_ double: Double?) -> Measurement<UnitMass>? {
+		guard let double else {
+			return nil
+		}
 		// Assuming the input is in kilograms, create and return a Measurement<UnitMass>
 		return Measurement(value: double, unit: .kilograms)
 	}

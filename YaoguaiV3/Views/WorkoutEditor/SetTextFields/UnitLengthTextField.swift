@@ -17,9 +17,7 @@ struct UnitLengthTextField: View {
 					doubleFromMeasurement(value)
 				},
 				set: { newValue in
-					if let newValue {
-						value = measurementFromDouble(newValue)
-					}
+					value = measurementFromDouble(newValue)
 				}
 			),
 			id: UUID().hashValue
@@ -27,17 +25,19 @@ struct UnitLengthTextField: View {
 	}
 	
 	// Convert Measurement<UnitLength> to Double for TextField
-	private func doubleFromMeasurement(_ measurement: Measurement<UnitLength>?) -> Double {
-		// If the measurement is nil, return 0.0 as the default
+	private func doubleFromMeasurement(_ measurement: Measurement<UnitLength>?) -> Double? {
 		guard let measurement = measurement else {
-			return 0.0
+			return nil
 		}
 		// Convert the measurement to kilograms and return the double value
 		return measurement.converted(to: .meters).value
 	}
 	
 	// Convert Double back to Measurement<UnitLength>
-	private func measurementFromDouble(_ double: Double) -> Measurement<UnitLength>? {
+	private func measurementFromDouble(_ double: Double?) -> Measurement<UnitLength>? {
+		guard let double else {
+			return nil
+		}
 		// Assuming the input is in kilograms, create and return a Measurement<UnitLength>
 		return Measurement(value: double, unit: .meters)
 	}

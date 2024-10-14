@@ -105,11 +105,7 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 						textField.deleteBackward()
 						
 						if let newText = textField.text {
-							textField.text = newText
-							
-							if let textFieldText = textField.text {
-								value = V(textFieldText)
-							}
+							value = V(newText)
 						}
 					},
 					hideKeyboard: { textField.endEditing(true) },
@@ -128,7 +124,6 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 			])
 			
 			textField.inputView = inputView
-			//			textField.inputView = UIPickerView()
 		}
 		
 		setupKeyboard()
@@ -150,13 +145,8 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 		return containerView
 	}
 	
-	/// Updates the state of the specified view with new information from SwiftUI.
+	// Updates the state of the specified view with new information from SwiftUI.
 	func updateUIView(_ uiView: UIView, context: Context) {
-		//		if let textField = uiView.subviews.first(where: { $0 is UITextField }) as? UITextField {
-		//			if let value {
-		//				textField.text = String(value)
-		//			}
-		//		}
 		if let textField = uiView.subviews.first(where: { $0 is UITextField }) as? UITextField {
 			if let value = value {
 				// Convert the value to a Double
@@ -191,39 +181,36 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 				return
 			}
 			
-			/// Focuses and selects all
+			// Focuses and selects all
 			textField.becomeFirstResponder()
 			textField.selectAll(nil)
 		}
 		
-		/// This delegate method is called when the user types or deletes characters in the UITextField.
-		/// It attempts to convert the updated string (newValue) to the numeric type V.
-		/// It ensures that the SwiftUI binding of `value` is updated
+		// This delegate method is called when the user types or deletes characters in the UITextField.
+		// E.g. in simulator and your typing on your mac keyboard
+		// It attempts to convert the updated string (newValue) to the numeric type V.
+		// It ensures that the SwiftUI binding of `value` is updated
 		func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
 			let text = textField.text as NSString?
 			let newValue = text?.replacingCharacters(in: range, with: string)
 			
+			guard let newValue, !newValue.isEmpty else {
+				self.value.wrappedValue = nil
+				return true
+			}
+			
 			// Attempt to convert the new value to a Double
-			if let doubleValue = Double(newValue ?? "0") {
-				// Check if the doubleValue is within the acceptable range for Int
-				if doubleValue <= Double(Int.max), doubleValue >= Double(Int.min) {
-					// Update the bound value if within range
-					if let number = V(newValue ?? "0") {
-						self.value.wrappedValue = number
-						return true
-					}
-				}
-				// Return false to prevent changes if outside range
-				return false
-			} else {
-				// Allow clearing of the text field
-				if newValue == nil || newValue!.isEmpty {
-					self.value.wrappedValue = 0
+			// And protect against going ouside of acceptable range for Int
+			if let doubleValue = Double(newValue), doubleValue <= Double(Int.max), doubleValue >= Double(Int.min) {
+				// Update the bound value if within range
+				if let number = V(newValue) {
+					self.value.wrappedValue = number
 					return true
 				}
-				// Block invalid input
-				return false
 			}
+			
+			// Return false to prevent changes since it's probably an input that's not accounted for
+			return false
 		}
 		
 		func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {

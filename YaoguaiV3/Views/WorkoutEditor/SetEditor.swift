@@ -64,7 +64,7 @@ struct SetEditor<T: SetCommon>: View {
 						}
 						HStack {
 							UnitMassTextField(value: $set.value)
-							Text(set.valueString)
+							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 						}
 					case .duration:
 						HStack {
@@ -78,7 +78,7 @@ struct SetEditor<T: SetCommon>: View {
 						}
 						HStack {
 							UnitMassTextField(value: $set.value)
-							Text(set.valueString)
+							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 						}
 					case .reps:
 						HStack {

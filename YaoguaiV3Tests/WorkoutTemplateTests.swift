@@ -11,8 +11,7 @@ import Foundation
 @testable import YaoguaiV3
 
 @Suite("Workout Template Tests") struct WorkoutTemplateTests {
-	@MainActor @Test func testInitialise() async throws {
-		/// Create, insert and save workout in context Initialise it in ViewModel
+	@MainActor @Test func test_workoutTemplateViewModelInitialise_shouldWork() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
@@ -23,24 +22,23 @@ import Foundation
 		#expect(workoutTemplatesInDB == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
 	}
 	
-	@MainActor @Test func testCompleteValidWorkout() async throws {
-		/// Create, insert and save workout in context Initialise it in ViewModel
+	@MainActor @Test func test_workoutTemplateViewModelComplete_shouldSaveNameAndExercisesIfValid() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
 		
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext))
-		#expect(templateViewModel.workout.exercises.count == 1, "Expected workout to have 1 exercise, but found \(templateViewModel.workout.exercises.count)")
+		templateViewModel.workout.name = "New Name"
 		templateViewModel.completeNewWorkout()
 		
 		let anotherContext = ModelContext(container)
 		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
 		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise, but found \(workoutTemplatesInDB[0].exercises.count)")
+		#expect(workoutTemplatesInDB[0].name == "New Name", "Expected workout name to be 'New Name', but found \(workoutTemplatesInDB[0].name)")
 	}
 	
-	@MainActor @Test func testCompleteInvalidWorkout() async throws {
-		/// Create, insert and save workout in context Initialise it in ViewModel
+	@MainActor @Test func test_workoutTemplateViewModelComplete_shouldRemoveWorkoutIfInvalid() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext, name: "")
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
@@ -51,8 +49,7 @@ import Foundation
 		#expect(workoutTemplatesInDB == 0, "Expected 0 workout record in the database, but found \(workoutTemplatesInDB)")
 	}
 	
-	@MainActor @Test func testCanCancelNewWorkout() async throws {
-		/// Create, insert and save workout in context Initialise it in ViewModel
+	@MainActor @Test func test_workoutTemplateViewModelCancel_shouldDeleteWorkoutFromDb() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
@@ -68,40 +65,47 @@ import Foundation
 	/// Add an exercise via the ViewModel
 	/// Save via the ViewModel
 	/// Fetch WorkoutTemplates and assert there's 1 workout
-	@MainActor @Test func testSaveValidWorkout() async throws {
+	@MainActor @Test func test_workoutTemplateViewModelSave_shouldSaveNameAndExercisesIfValid() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext))
+		templateViewModel.workout.name = "New Name"
 		templateViewModel.saveExistingWorkout()
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
-		#expect(workoutTemplatesInDB == 1, "Expected 1 workout template in database")
-		
+		let anotherContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
+		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
+		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise, but found \(workoutTemplatesInDB[0].exercises.count)")
+		#expect(workoutTemplatesInDB[0].name == "New Name", "Expected workout name to be 'New Name', but found \(workoutTemplatesInDB[0].name)")
 	}
 	
 	/// Create, insert and save workout in context Initialise it in ViewModel
 	/// Make the name an empty string via the ViewModel
 	/// Save via the ViewModel
 	/// Fetch WorkoutTemplates and assert that the name is still the same
-	@MainActor @Test func testSaveInvalidWorkout() async throws {
+	@MainActor @Test func test_workoutTemplateViewModelSave_shouldntSaveNameAndExercisesIfInvalid() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
 		templateViewModel.workout.name = ""
 		templateViewModel.saveExistingWorkout()
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext)
-		#expect(workoutTemplatesInDB[0].name == WorkoutTemplateTests.defaultWorkoutName, "Expected name to not change")
+		let anotherContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
+		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
+		#expect(workoutTemplatesInDB[0].exercises.count == 0, "Expected workout to have 0 exercise, but found \(workoutTemplatesInDB[0].exercises.count)")
+		#expect(workoutTemplatesInDB[0].name == WorkoutTemplateTests.defaultWorkoutName, "Expected default workout name, but found \(workoutTemplatesInDB[0].name)")
 	}
 	
 	/// Create, insert and save workout in context Initialise it in ViewModel
 	/// Delete via ViewModel
 	/// Fetch WorkoutTemplates and assert count is 0
-	@MainActor @Test func testCanDeleteExistingWorkout() async throws {
+	@MainActor @Test func test_workoutTemplateViewModelDelete_shouldDeleteWorkoutFromDb() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
 		templateViewModel.deleteExistingWorkout()
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext)
+		let anotherContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
 		#expect(workoutTemplatesInDB.isEmpty, "Expected workout templates to be empty")
 	}
 	
@@ -111,7 +115,7 @@ import Foundation
 	/// Assert nothing has changed
 	/// Save
 	/// Assert that template has changed
-	@MainActor @Test func testShouldntAutosave() async throws {
+	@MainActor @Test func test_workoutTemplateViewModel_shouldntAutosave() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
@@ -143,7 +147,7 @@ import Foundation
 	/// Create, insert and save workout in context Initialise it in ViewModel
 	/// Attempt to add the same Exercise twice
 	/// Assert that exercise count is 1
-	@MainActor @Test func testAddDuplicateExercisesToWorkout() async throws {
+	@MainActor @Test func test_workoutTemplateViewModel_shouldntBeAbleToAddDuplicateExercises() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)

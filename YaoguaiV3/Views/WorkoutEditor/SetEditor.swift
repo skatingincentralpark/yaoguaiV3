@@ -24,7 +24,7 @@ struct SetEditor<T: SetCommon>: View {
 	}
 	
 	var body: some View {
-		VStack(alignment: .leading, spacing: 5) {
+		VStack {
 			Button(action: {
 				if let previousSet {
 					set.reps = previousSet.reps
@@ -46,7 +46,7 @@ struct SetEditor<T: SetCommon>: View {
 				case .weightAndReps:
 					HStack {
 						UnitMassTextField(value: $set.value)
-						Text(set.valueString)
+						Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 					}
 					HStack {
 						SimpleTextFieldV2(value: $set.reps)
@@ -116,7 +116,7 @@ struct SetEditor<T: SetCommon>: View {
 		})
 	}
 	
-
+	
 }
 
 struct CompleteToggleView: View {

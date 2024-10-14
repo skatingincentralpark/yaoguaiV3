@@ -23,16 +23,16 @@ struct WorkoutTemplateList: View {
 				try? modelContext.save()
 				newTemplate = template
 			}
-			.onChange(of: newTemplate, { oldValue, newValue in
-				if newValue == nil {
-					if let oldValue {
-						if oldValue.name.isEmpty || oldValue.exercises.count == 0 {
-							alertManager.addAlert("Deleting new template because it's empty", type: .warning)
-							modelContext.delete(oldValue)
-						}
-					}
-				}
-			})
+//			.onChange(of: newTemplate, { oldValue, newValue in
+//				if newValue == nil {
+//					if let oldValue {
+//						if oldValue.name.isEmpty || oldValue.exercises.count == 0 {
+//							alertManager.addAlert("Deleting new template because it's empty", type: .warning)
+//							modelContext.delete(oldValue)
+//						}
+//					}
+//				}
+//			})
 			.sheet(item: $newTemplate) { template in
 				NavigationStack {
 					WorkoutTemplateEditorWrapper(workoutId: template.id, in: modelContext.container, isNewWorkout: true)

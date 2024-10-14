@@ -127,7 +127,7 @@ protocol SetCommon: Identifiable, Codable, Equatable {
 extension SetCommon {
 	var valueString: String {
 		guard let value = value else { return "" }
-		return value.formatted()
+		return value.value.formatted()
 	}
 	
 	var rpeString: String {

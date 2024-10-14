@@ -9,12 +9,14 @@ import Foundation
 import SwiftData
 
 @MainActor
-func setupPreview() throws -> (ModelContainer, CurrentWorkoutManager) {
+func setupPreview(noInitialData: Bool = false) throws -> (ModelContainer, CurrentWorkoutManager) {
 	let modelContainer: ModelContainer
 	modelContainer = try ModelContainer(for: WorkoutRecord.self, WorkoutTemplate.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
 	
-	let record = getWorkoutRecord(modelContainer.mainContext)
-	modelContainer.mainContext.insert(record)
+	if !noInitialData {
+		let record = getWorkoutRecord(modelContainer.mainContext)
+		modelContainer.mainContext.insert(record)
+	}
 		
 	let workoutManager = CurrentWorkoutManager(modelContext: modelContainer.mainContext)
 	

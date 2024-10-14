@@ -10,10 +10,11 @@ import SwiftData
 import Foundation
 @testable import YaoguaiV3
 
+@MainActor
 @Suite("Current Workout Manager Tests") final class CurrentWorkoutManagerTests {
 	let savePath = URL.documentsDirectory.appending(path: "CurrentWorkout")
 	
-	@MainActor init() async throws {
+	init() async throws {
 		if FileManager.default.fileExists(atPath: savePath.path) {
 			try FileManager.default.removeItem(at: savePath)
 		}
@@ -27,7 +28,7 @@ import Foundation
 		} catch {}
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldStartEmpty() async throws {
+	@Test func test_currentWorkoutManagerInitialise_shouldStartEmpty() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -45,7 +46,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout records in the database on initial load")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToStorageAndFileSystem() async throws {
+	@Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToStorageAndFileSystem() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -65,7 +66,7 @@ import Foundation
 		
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldRestoreCurrentWorkout() async throws {
+	@Test func test_currentWorkoutManagerInitialise_shouldRestoreCurrentWorkout() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -92,7 +93,7 @@ import Foundation
 		try #require(initialWorkoutId == currentWorkoutId, "Expected the initial and current workoutId to be the same")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldNotRestoreCancelledWorkout() async throws {
+	@Test func test_currentWorkoutManagerInitialise_shouldNotRestoreCancelledWorkout() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -115,7 +116,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout record in the database after after canceling")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerComplete_shouldSaveValidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
+	@Test func test_currentWorkoutManagerComplete_shouldSaveValidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -148,7 +149,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords[0].exercises.count == 1, "Expected 1 exercise in the workout record after completing")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerComplete_shouldNotSaveInvalidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
+	@Test func test_currentWorkoutManagerComplete_shouldNotSaveInvalidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -166,7 +167,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout records in the database after after completing")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerCancel_shouldDeleteFromStorageAndFileSystem() async throws {
+	@Test func test_currentWorkoutManagerCancel_shouldDeleteFromStorageAndFileSystem() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -196,7 +197,7 @@ import Foundation
 		try #require(fetchedExerciseRecords.count == 0, "Expected 0 exercise records in the database after after canceling")
 	}
 	
-	@MainActor @Test func test_workoutRecordAddExercise_shouldNotAddDuplicates() async throws {
+	@Test func test_workoutRecordAddExercise_shouldNotAddDuplicates() async throws {
 		let container = try await createContainer()
 		
 		let workoutRecord = WorkoutRecord()

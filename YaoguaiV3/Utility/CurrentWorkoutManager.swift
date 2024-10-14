@@ -141,7 +141,9 @@ final class CurrentWorkoutManager {
 		
 		/// If there's 0 exercises remaining, don't save the workout
 		if currentWorkout.exercises.count == 0 {
+			alertManager.addAlert("Deleting workout record because it's empty", type: .info)
 			modelContext.delete(currentWorkout)
+			try? modelContext.save()
 		} else {
 			/// Update the latest exercise records
 			currentWorkout.exercises.forEach { record in

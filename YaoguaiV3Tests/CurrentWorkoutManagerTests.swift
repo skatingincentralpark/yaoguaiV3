@@ -35,7 +35,8 @@ import Foundation
 		let currentWorkout = workoutManager.currentWorkout
 		let currentWorkoutId = workoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
+		let verificationContext = ModelContext(container)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(currentWorkout == nil, "Expected no current workout on initial load")
@@ -53,7 +54,8 @@ import Foundation
 		let newCurrentWorkout = workoutManager.currentWorkout
 		let newCurrentWorkoutId = workoutManager.currentWorkoutId
 		let newSavedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
+		let verificationContext = ModelContext(container)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(newCurrentWorkout != nil, "Expected a workout after starting a workout")
@@ -80,7 +82,8 @@ import Foundation
 		let currentWorkoutId = newWorkoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
+		let verificationContext = ModelContext(container)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
 		
 		try #require(currentWorkout != nil, "Expected current workout after starting a workout")
 		try #require(currentWorkoutId != nil, "Expected current workout ID after starting a workout")
@@ -102,7 +105,8 @@ import Foundation
 		let currentWorkoutId = newWorkoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
+		let verificationContext = ModelContext(container)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(currentWorkout == nil, "Expected no workout after canceling")
@@ -131,8 +135,9 @@ import Foundation
 		workoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
-		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext)
+		let verificationContext = ModelContext(container)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
+		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
@@ -151,7 +156,8 @@ import Foundation
 		workoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
+		let verificationContext = ModelContext(container)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
@@ -178,8 +184,9 @@ import Foundation
 		workoutManager.cancel()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
-		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext)
+		let verificationContext = ModelContext(container)
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
+		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: verificationContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")

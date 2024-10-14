@@ -15,7 +15,8 @@ import Foundation
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
+		let verificationContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext).count
 		#expect(templateViewModel.workout.id == template.id, "Expected \(template.id) but found \(templateViewModel.workout.id)")
 		#expect(templateViewModel.workout.name == WorkoutTemplateTests.defaultWorkoutName, "Expected specific name")
 		#expect(workoutTemplatesInDB == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
@@ -28,9 +29,9 @@ import Foundation
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .dips))
 		templateViewModel.workout.name = "YEAH GEE"
 		templateViewModel.saveNewWorkout()
-		let anotherContext = ModelContext(container)
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
-		let exerciseTemplatesInDB = try fetchModel(ofType: ExerciseTemplate.self, in: anotherContext)
+		let verificationContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext)
+		let exerciseTemplatesInDB = try fetchModel(ofType: ExerciseTemplate.self, in: verificationContext)
 		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise, but found \(workoutTemplatesInDB[0].exercises.count)")
 		#expect(exerciseTemplatesInDB.count == 1, "Expected 1 exercise record in the database, but found \(exerciseTemplatesInDB)")
@@ -43,7 +44,8 @@ import Foundation
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .dips))
 		templateViewModel.saveNewWorkout()
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
+		let verificationContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext).count
 		#expect(workoutTemplatesInDB == 0, "Expected 0 workout record in the database, but found \(workoutTemplatesInDB)")
 	}
 	
@@ -52,7 +54,8 @@ import Foundation
 		let template = try createWorkoutTemplate(in: container.mainContext, name: "New Workout")
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
 		templateViewModel.saveNewWorkout()
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
+		let verificationContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext).count
 		#expect(workoutTemplatesInDB == 0, "Expected 0 workout record in the database, but found \(workoutTemplatesInDB)")
 	}
 	
@@ -61,11 +64,13 @@ import Foundation
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext))
-		var workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
+		let verificationContext = ModelContext(container)
+		var workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext).count
 		#expect(workoutTemplatesInDB == 1, "Expected 1 workout template in the database, but found \(workoutTemplatesInDB)")
 		templateViewModel.cancelNewWorkout()
-		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
-		let exerciseTemplatesInDB = try fetchModel(ofType: ExerciseTemplate.self, in: container.mainContext).count
+		let updatedVerificationContext = ModelContext(container)
+		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: updatedVerificationContext).count
+		let exerciseTemplatesInDB = try fetchModel(ofType: ExerciseTemplate.self, in: updatedVerificationContext).count
 		#expect(workoutTemplatesInDB == 0, "Expected 0 workout templates in the database, but found \(workoutTemplatesInDB)")
 		#expect(exerciseTemplatesInDB == 0, "Expected 0 exercise templates in the database, but found \(exerciseTemplatesInDB)")
 	}
@@ -81,9 +86,9 @@ import Foundation
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext))
 		templateViewModel.workout.name = "New Name"
 		templateViewModel.saveExistingWorkout()
-		let anotherContext = ModelContext(container)
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
-		let exerciseTemplatesInDB = try fetchModel(ofType: ExerciseTemplate.self, in: anotherContext)
+		let verificationContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext)
+		let exerciseTemplatesInDB = try fetchModel(ofType: ExerciseTemplate.self, in: verificationContext)
 		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise, but found \(workoutTemplatesInDB[0].exercises.count)")
 		#expect(exerciseTemplatesInDB.count == 1, "Expected 1 exercise record in the database, but found \(exerciseTemplatesInDB)")
@@ -100,8 +105,8 @@ import Foundation
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
 		templateViewModel.workout.name = ""
 		templateViewModel.saveExistingWorkout()
-		let anotherContext = ModelContext(container)
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
+		let verificationContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext)
 		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 0, "Expected workout to have 0 exercise, but found \(workoutTemplatesInDB[0].exercises.count)")
 		#expect(workoutTemplatesInDB[0].name == WorkoutTemplateTests.defaultWorkoutName, "Expected default workout name, but found \(workoutTemplatesInDB[0].name)")
@@ -115,8 +120,8 @@ import Foundation
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
 		templateViewModel.deleteExistingWorkout()
-		let anotherContext = ModelContext(container)
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
+		let verificationContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext)
 		#expect(workoutTemplatesInDB.isEmpty, "Expected workout templates to be empty")
 	}
 	
@@ -133,8 +138,8 @@ import Foundation
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .dips))
 		templateViewModel.saveExistingWorkout()
 		
-		let anotherContext = ModelContext(container)
-		var workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
+		let verificationContext = ModelContext(container)
+		var workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: verificationContext)
 		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout template but had \(workoutTemplatesInDB[0].exercises.count)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise but had \(workoutTemplatesInDB[0].exercises.count)")
 		
@@ -142,15 +147,15 @@ import Foundation
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .farmersCarries))
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .pullups))
 		
-		let anotherContext2 = ModelContext(container)
-		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext2)
+		let updatedVerificationContext = ModelContext(container)
+		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: updatedVerificationContext)
 		#expect(workoutTemplatesInDB[0].name == WorkoutTemplateTests.defaultWorkoutName, "Expected workout name to be \(WorkoutTemplateTests.defaultWorkoutName) but was \(workoutTemplatesInDB[0].name)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise but had \(workoutTemplatesInDB[0].exercises.count)")
 		
 		templateViewModel.saveExistingWorkout()
 		
-		let anotherContext3 = ModelContext(container)
-		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext3)
+		let updatedVerificationContext2 = ModelContext(container)
+		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: updatedVerificationContext2)
 		#expect(workoutTemplatesInDB[0].name == "Lower", "Expected workout name to be \(WorkoutTemplateTests.defaultWorkoutName) but was \(workoutTemplatesInDB[0].name)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 3, "Expected workout to have 3 exercise but had \(workoutTemplatesInDB[0].exercises.count)")
 	}

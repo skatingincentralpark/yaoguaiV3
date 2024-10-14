@@ -45,7 +45,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout records in the database on initial load")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToDbAndDocs() async throws {
+	@MainActor @Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToStorageAndFileSystem() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -115,7 +115,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout record in the database after after canceling")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerComplete_shouldSaveValidWorkoutToDbAndShouldRemoveIdFromDocs() async throws {
+	@MainActor @Test func test_currentWorkoutManagerComplete_shouldSaveValidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -148,7 +148,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords[0].exercises.count == 1, "Expected 1 exercise in the workout record after completing")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerComplete_shouldNotSaveInvalidWorkoutToDbAndShouldRemoveIdFromDocs() async throws {
+	@MainActor @Test func test_currentWorkoutManagerComplete_shouldNotSaveInvalidWorkoutToStorageAndShouldRemoveIdFromFileSystem() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -166,7 +166,7 @@ import Foundation
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout records in the database after after completing")
 	}
 	
-	@MainActor @Test func test_currentWorkoutManagerCancel_shouldDeleteFromDbAndDocs() async throws {
+	@MainActor @Test func test_currentWorkoutManagerCancel_shouldDeleteFromStorageAndFileSystem() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		

@@ -59,7 +59,7 @@ import Foundation
 		#expect(fetchedWorkoutTemplates == 0, "Expected 0 workout record in the database, but found \(fetchedWorkoutTemplates)")
 	}
 	
-	@MainActor @Test func test_workoutTemplateViewModelCancelNewWorkout_shouldDeleteWorkoutAndExercisesFromDb() async throws {
+	@MainActor @Test func test_workoutTemplateViewModelCancelNewWorkout_shouldDeleteWorkoutAndExercisesFromStorage() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
@@ -115,7 +115,7 @@ import Foundation
 	/// Create, insert and save workout in context Initialise it in ViewModel
 	/// Delete via ViewModel
 	/// Fetch WorkoutTemplates and assert count is 0
-	@MainActor @Test func test_workoutTemplateViewModelDelete_shouldDeleteWorkoutFromDb() async throws {
+	@MainActor @Test func test_workoutTemplateViewModelDelete_shouldDeleteWorkoutFromStorage() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)

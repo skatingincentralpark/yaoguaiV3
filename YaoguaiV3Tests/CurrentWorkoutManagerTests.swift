@@ -27,8 +27,7 @@ import Foundation
 		} catch {}
 	}
 	
-	//	Should initialise with no data
-	@MainActor @Test func testInitialise() async throws {
+	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldStartEmpty() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -45,8 +44,7 @@ import Foundation
 		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database on initial load")
 	}
 	
-	//	Should be able to start a new workout
-	@MainActor @Test func testStartWorkout() async throws {
+	@MainActor @Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToDbAndDocs() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -65,14 +63,14 @@ import Foundation
 		
 	}
 	
-	// Starting a workout can restore an ongoing workout
-	@MainActor @Test func testRestoreWorkout() async throws {
+	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldRestoreCurrentWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
 		workoutManager.startNewWorkout()
+		
 		guard let initialWorkoutId = workoutManager.currentWorkoutId else {
-			Issue.record("No workoutId found.") // not sure if this early returns, need to test!
+			Issue.record("No workoutId found.")
 			return
 		}
 		
@@ -84,7 +82,6 @@ import Foundation
 		
 		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
 		
-		// Then: assert that the initial state is as expected
 		try #require(currentWorkout != nil, "Expected current workout after starting a workout")
 		try #require(currentWorkoutId != nil, "Expected current workout ID after starting a workout")
 		try #require(savedWorkoutExists, "Expected saved workout file after starting a workout")
@@ -92,27 +89,7 @@ import Foundation
 		try #require(initialWorkoutId == currentWorkoutId, "Expected the initial and current workoutId to be the same")
 	}
 	
-	// Should cancel a workout correctly and clean up
-	@MainActor @Test func testCancelWorkout() async throws {
-		let container = try await createContainer()
-		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
-		
-		workoutManager.startNewWorkout()
-		workoutManager.cancel()
-		
-		let currentWorkout = workoutManager.currentWorkout
-		let currentWorkoutId = workoutManager.currentWorkoutId
-		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
-		
-		try #require(currentWorkout == nil, "Expected no workout after canceling")
-		try #require(currentWorkoutId == nil, "Expected no current workout ID after canceling")
-		try #require(!savedWorkoutExists, "Expected no saved workout file after canceling")
-		try #require(workoutRecordsInDB == 0, "Expected no workout record in the database after after canceling")
-	}
-	
-	// Should not restore a workout that's been cancelled
-	@MainActor @Test func testRestoreAfterCancelWorkout() async throws {
+	@MainActor @Test func test_currentWorkoutManagerInitialise_shouldNotRestoreCancelledWorkout() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -134,8 +111,7 @@ import Foundation
 		try #require(workoutRecordsInDB == 0, "Expected no workout record in the database after after canceling")
 	}
 	
-	// Should save a workout if completed with a valid set
-	@MainActor @Test func testCompleteValidWorkout() async throws {
+	@MainActor @Test func test_currentWorkoutManagerComplete_shouldSaveValidWorkoutToDbAndShouldRemoveIdFromDocs() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -159,6 +135,7 @@ import Foundation
 		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext).count
 		
 		// Then: assert that the initial state is as expected
+		// Todo: maybe we should assert that the relationship exists rather than just querying the record.count
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
 		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
@@ -166,8 +143,7 @@ import Foundation
 		try #require(exerciseRecordsInDB == 1, "Expected 1 exercise record in the database after after completing")
 	}
 	
-	// Should not save a workout if completed without a valid set
-	@MainActor @Test func testCompleteInvalidWorkout() async throws {
+	@MainActor @Test func test_currentWorkoutManagerComplete_shouldNotSaveInvalidWorkoutToDbAndShouldRemoveIdFromDocs() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -184,8 +160,7 @@ import Foundation
 		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database after after completing")
 	}
 	
-	// Should delete all valid exercises if workout is cancelled
-	@MainActor @Test func testCancelValidWorkout() async throws {
+	@MainActor @Test func test_currentWorkoutManagerCancel_shouldDeleteFromDbAndDocs() async throws {
 		let container = try await createContainer()
 		let workoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
 		
@@ -214,7 +189,7 @@ import Foundation
 		try #require(exerciseRecordsInDB == 0, "Expected 0 exercise records in the database after after canceling")
 	}
 	
-	@MainActor @Test func testAddDuplicateExercisesToWorkout() async throws {
+	@MainActor @Test func test_workoutRecordAddExercise_shouldNotAddDuplicates() async throws {
 		let container = try await createContainer()
 		
 		let workoutRecord = WorkoutRecord()

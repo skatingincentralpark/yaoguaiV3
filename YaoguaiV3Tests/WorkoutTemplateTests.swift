@@ -29,11 +29,14 @@ import Foundation
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
 		
-		let exercise = Exercise(name: "Burpees", category: .reps)
-		templateViewModel.workout.addExercise(details: exercise)
+		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext))
+		#expect(templateViewModel.workout.exercises.count == 1, "Expected workout to have 1 exercise, but found \(templateViewModel.workout.exercises.count)")
 		templateViewModel.completeNewWorkout()
-		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
-		#expect(workoutTemplatesInDB == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
+		
+		let anotherContext = ModelContext(container)
+		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
+		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout record in the database, but found \(workoutTemplatesInDB)")
+		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise, but found \(workoutTemplatesInDB[0].exercises.count)")
 	}
 	
 	@MainActor @Test func testCompleteInvalidWorkout() async throws {
@@ -42,8 +45,7 @@ import Foundation
 		let template = try createWorkoutTemplate(in: container.mainContext, name: "")
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
 		
-		let exercise = Exercise(name: "Burpees", category: .reps)
-		templateViewModel.workout.addExercise(details: exercise)
+		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .dips))
 		templateViewModel.completeNewWorkout()
 		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
 		#expect(workoutTemplatesInDB == 0, "Expected 0 workout record in the database, but found \(workoutTemplatesInDB)")
@@ -70,7 +72,7 @@ import Foundation
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
-		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: container.mainContext))
+		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext))
 		templateViewModel.saveExistingWorkout()
 		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
 		#expect(workoutTemplatesInDB == 1, "Expected 1 workout template in database")
@@ -103,26 +105,39 @@ import Foundation
 		#expect(workoutTemplatesInDB.isEmpty, "Expected workout templates to be empty")
 	}
 	
-	/// Create, insert and save workout in context Initialise it in ViewModel
-	/// Add an exercise and save
-	/// Fetch WorkoutTemplates and assert there's 1 exercise
-	/// Change the name via the ViewModel
-	/// Add an exercise via the ViewModel
-	/// Fetch WorkoutTemplates and assert name and exercise count didn't change
+	/// Create a workout template with 1 exercise and save
+	/// Assert there's 1 template with 1 exercise
+	/// Add 1 more exercise and change the name
+	/// Assert nothing has changed
+	/// Save
+	/// Assert that template has changed
 	@MainActor @Test func testShouldntAutosave() async throws {
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
-		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: container.mainContext))
+		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .dips))
 		templateViewModel.saveExistingWorkout()
-		var workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext)
+		
+		let anotherContext = ModelContext(container)
+		var workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
+		#expect(workoutTemplatesInDB.count == 1, "Expected 1 workout template but had \(workoutTemplatesInDB[0].exercises.count)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise but had \(workoutTemplatesInDB[0].exercises.count)")
+		
 		templateViewModel.workout.name = "Lower"
-		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: container.mainContext))
-		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext)
+		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .farmersCarries))
+		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .pullups))
+		
+		let anotherContext2 = ModelContext(container)
+		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext2)
 		#expect(workoutTemplatesInDB[0].name == WorkoutTemplateTests.defaultWorkoutName, "Expected workout name to be \(WorkoutTemplateTests.defaultWorkoutName) but was \(workoutTemplatesInDB[0].name)")
 		#expect(workoutTemplatesInDB[0].exercises.count == 1, "Expected workout to have 1 exercise but had \(workoutTemplatesInDB[0].exercises.count)")
 		
+		templateViewModel.saveExistingWorkout()
+		
+		let anotherContext3 = ModelContext(container)
+		workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext3)
+		#expect(workoutTemplatesInDB[0].name == "Lower", "Expected workout name to be \(WorkoutTemplateTests.defaultWorkoutName) but was \(workoutTemplatesInDB[0].name)")
+		#expect(workoutTemplatesInDB[0].exercises.count == 3, "Expected workout to have 3 exercise but had \(workoutTemplatesInDB[0].exercises.count)")
 	}
 	
 	/// Create, insert and save workout in context Initialise it in ViewModel
@@ -132,7 +147,7 @@ import Foundation
 		let container = try await createContainer()
 		let template = try createWorkoutTemplate(in: container.mainContext)
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container)
-		let exerciseDetails = try getExerciseDetail(from: container.mainContext)
+		let exerciseDetails = try getExerciseDetail(from: templateViewModel.modelContext)
 		templateViewModel.workout.addExercise(details: exerciseDetails)
 		templateViewModel.workout.addExercise(details: exerciseDetails)
 		#expect(templateViewModel.workout.getValue(forKey: \.exercises).count == 1, "Expected 1 exercise")
@@ -153,9 +168,15 @@ private extension WorkoutTemplateTests {
 		func addDummyExercises(in modelContext: ModelContext) throws {
 			let pullups = Exercise(name: "Pullups", category: .weightAndReps)
 			let pushups = Exercise(name: "Pushups", category: .weightAndReps)
+			let farmersCarries = Exercise(name: "Farmers Carries", category: .durationAndWeight)
+			let dips = Exercise(name: "Dips", category: .weightAndReps)
+			let planks = Exercise(name: "Planks", category: .duration)
 			
 			modelContext.insert(pullups)
 			modelContext.insert(pushups)
+			modelContext.insert(farmersCarries)
+			modelContext.insert(dips)
+			modelContext.insert(planks)
 			
 			try modelContext.save()
 		}
@@ -165,11 +186,34 @@ private extension WorkoutTemplateTests {
 		return container
 	}
 	
-	func getExerciseDetail(from modelContext: ModelContext) throws -> Exercise {
+	enum ExerciseName: String {
+		case pullups = "Pullups"
+		case pushups = "Pushups"
+		case farmersCarries = "Farmers Carries"
+		case dips = "Dips"
+		case planks = "Planks"
+		
+		var displayName: String {
+			return self.rawValue
+		}
+	}
+
+	func getExerciseDetail(from modelContext: ModelContext, name: ExerciseName? = nil) throws -> Exercise {
 		let descriptor = FetchDescriptor<Exercise>(predicate: #Predicate { _ in true })
 		let exercises = try modelContext.fetch(descriptor)
-		let id = exercises.randomElement()!.id
-		return modelContext.model(for: id) as? Exercise ?? Exercise(name: "AUTO_GENERATED", category: .durationAndWeight)
+		
+		// Try to find exercise by name if name is provided
+		if let name, let foundExercise = exercises.first(where: { $0.name == name.displayName }) {
+			return foundExercise
+		}
+		
+		// If name is nil or no exercise was found, return a random exercise
+		if let randomExercise = exercises.randomElement() {
+			return randomExercise
+		}
+		
+		// If there are no exercises in the database, return a default exercise
+		return Exercise(name: "AUTO_GENERATED", category: .durationAndWeight)
 	}
 	
 	func fetchModel<T: PersistentModel>(ofType type: T.Type, in context: ModelContext) throws -> [T] {

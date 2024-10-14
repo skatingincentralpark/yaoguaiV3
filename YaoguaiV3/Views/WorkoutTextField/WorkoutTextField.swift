@@ -202,13 +202,26 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 		func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
 			let text = textField.text as NSString?
 			let newValue = text?.replacingCharacters(in: range, with: string)
-			if let number = V(newValue ?? "0") {
-				self.value.wrappedValue = number
-				return true
-			} else {
-				if nil == newValue || newValue!.isEmpty {
-					self.value.wrappedValue = 0
+			
+			// Attempt to convert the new value to a Double
+			if let doubleValue = Double(newValue ?? "0") {
+				// Check if the doubleValue is within the acceptable range for Int
+				if doubleValue <= Double(Int.max), doubleValue >= Double(Int.min) {
+					// Update the bound value if within range
+					if let number = V(newValue ?? "0") {
+						self.value.wrappedValue = number
+						return true
+					}
 				}
+				// Return false to prevent changes if outside range
+				return false
+			} else {
+				// Allow clearing of the text field
+				if newValue == nil || newValue!.isEmpty {
+					self.value.wrappedValue = 0
+					return true
+				}
+				// Block invalid input
 				return false
 			}
 		}

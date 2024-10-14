@@ -29,7 +29,7 @@ import Foundation
 		
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext))
 		templateViewModel.workout.name = "New Name"
-		templateViewModel.completeNewWorkout()
+		templateViewModel.saveNewWorkout()
 		
 		let anotherContext = ModelContext(container)
 		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: anotherContext)
@@ -44,7 +44,7 @@ import Foundation
 		let templateViewModel = WorkoutTemplateEditorWrapper.ViewModel(workoutId: template.id, in: container, isNewWorkout: true)
 		
 		try templateViewModel.workout.addExercise(details: getExerciseDetail(from: templateViewModel.modelContext, name: .dips))
-		templateViewModel.completeNewWorkout()
+		templateViewModel.saveNewWorkout()
 		let workoutTemplatesInDB = try fetchModel(ofType: WorkoutTemplate.self, in: container.mainContext).count
 		#expect(workoutTemplatesInDB == 0, "Expected 0 workout record in the database, but found \(workoutTemplatesInDB)")
 	}

@@ -64,7 +64,7 @@ struct WorkoutTemplateEditorWrapper: View {
 	func newToolbarContent() -> some ToolbarContent {
 		ToolbarItem(placement: .confirmationAction) {
 			Button("Save") {
-				viewModel.completeNewWorkout()
+				viewModel.saveNewWorkout()
 				dismiss()
 			}
 			.tint(.green)
@@ -143,7 +143,7 @@ extension WorkoutTemplateEditorWrapper {
 			}
 		}
 		
-		func completeNewWorkout() {
+		func saveNewWorkout() {
 			alertManager.addAlert("Attempting to complete adding new workout template", type: .info)
 			
 			if workout.name.isEmpty {

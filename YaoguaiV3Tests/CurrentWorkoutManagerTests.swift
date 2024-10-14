@@ -46,6 +46,25 @@ import Foundation
 		try #require(fetchedWorkoutRecords.count == 0, "Expected no workout records in the database on initial load")
 	}
 	
+	@Test func test_currentWorkoutManagerStart_canStartFromTemplate() async throws {
+		let container = try await createContainer()
+		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)
+		let template = WorkoutTemplate(name: "Hardcore Shiz")
+		let exerciseDetail = try getExerciseDetail(from: container.mainContext)
+		template.addExercise(details: exerciseDetail)
+		template.exercises.first?.addSet()
+		// With the assumption that the exercise is weightAndReps (need to make it more obvious)
+		template.exercises[0].sets[0].value = Measurement(value: 30, unit: .kilograms)
+		template.exercises[0].sets[0].reps = 5
+		currentWorkoutManager.start(from: template)
+		let verificationContext = ModelContext(container)
+		let fetchedWorkoutRecords = try fetchModel(ofType: WorkoutRecord.self, in: verificationContext)
+		try #require(fetchedWorkoutRecords.count == 1)
+		try #require(currentWorkoutManager.currentWorkout?.name == "Hardcore Shiz")
+		try #require(currentWorkoutManager.currentWorkout?.exercises.first?.details == exerciseDetail)
+		try #require(currentWorkoutManager.currentWorkout?.exercises.first?.sets.count == 1)
+	}
+	
 	@Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToStorageAndFileSystem() async throws {
 		let container = try await createContainer()
 		let currentWorkoutManager = CurrentWorkoutManager(modelContext: container.mainContext)

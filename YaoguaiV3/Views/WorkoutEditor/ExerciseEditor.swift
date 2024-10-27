@@ -22,54 +22,53 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 	}
 	
 	var body: some View {
-		NavigationStack {
-			VStack(alignment: .leading) {
+		VStack(alignment: .leading) {
+			Text("Hey")
+			HStack {
+				Text(exercise.id.hashValue.formatted().prefix(7))
+					.lineLimit(1)
+					.padding(.horizontal)
+					.background(.bar)
+				Text(exercise.details?.name ?? "")
+				Button("Delete", role: .destructive, action: delete)
+				Button("Replace", role: .none, action: {
+					replaceExerciseSheetPresented = true
+				})
+				Spacer()
+				Button("Add Set") {
+					exercise.addSet()
+				}
+			}
+			
+			if exercise.sets.count > 0 {
 				HStack {
-					Text(exercise.id.hashValue.formatted().prefix(7))
-						.lineLimit(1)
-						.padding(.horizontal)
-						.background(.bar)
-					Text(exercise.details?.name ?? "")
-					Button("Delete", role: .destructive, action: delete)
-					Button("Replace", role: .none, action: {
-						replaceExerciseSheetPresented = true
-					})
-					Spacer()
-					Button("Add Set") {
-						exercise.addSet()
+					VStack {
+						ForEach(Array($exercise.sets.enumerated()), id: \.1.id) { index, set in
+							SetEditor(set: set, exercise: exercise.details, index: index, delete: { _ in
+								exercise.removeSet(set.wrappedValue)
+							})
+							.padding(.leading)
+						}
+						
+						
+					}
+					.overlay(alignment: .leading) {
+						Rectangle()
+							.frame(width: 1)
 					}
 				}
-				
-				if exercise.sets.count > 0 {
-					HStack {
-						VStack {
-							ForEach(Array($exercise.sets.enumerated()), id: \.1.id) { index, set in
-								SetEditor(set: set, exercise: exercise.details, index: index, delete: { _ in
-									exercise.removeSet(set.wrappedValue)
-								})
-								.padding(.leading)
-							}
-							
-							
-						}
-						.overlay(alignment: .leading) {
-							Rectangle()
-								.frame(width: 1)
-						}
+				.padding(.leading)
+			}
+		}
+		.sheet(isPresented: $replaceExerciseSheetPresented) {				
+			ExerciseDetailsList(
+				onSelect: {
+					if let replacementExercise = modelContext.model(for: $0.id) as? Exercise {
+						exercise.replaceDetails(newDetails: replacementExercise)
 					}
-					.padding(.leading)
-				}
-			}
-			.sheet(isPresented: $replaceExerciseSheetPresented) {				
-				ExerciseDetailsList(
-					onSelect: {
-						if let replacementExercise = modelContext.model(for: $0.id) as? Exercise {
-							exercise.replaceDetails(newDetails: replacementExercise)
-						}
-					},
-					category: exercise.details?.category
-				)
-			}
+				},
+				category: exercise.details?.category
+			)
 		}
 	}
 }

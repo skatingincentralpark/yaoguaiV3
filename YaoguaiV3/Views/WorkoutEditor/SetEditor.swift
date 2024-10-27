@@ -24,7 +24,7 @@ struct SetEditor<T: SetCommon>: View {
 	}
 	
 	var body: some View {
-		VStack {
+		VStack(alignment: .leading) {
 			Button(action: {
 				if let previousSet {
 					set.reps = previousSet.reps
@@ -41,48 +41,50 @@ struct SetEditor<T: SetCommon>: View {
 				}
 			})
 			
-			Group {
-				switch set.category {
-				case .weightAndReps:
-					HStack {
-						UnitMassTextField(value: $set.value)
-						Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-					}
-					HStack {
-						SimpleTextFieldV2(value: $set.reps)
-						Text("\(set.repsString) reps")
-					}
-					HStack {
-						SimpleTextFieldV2(value: $set.rpe)
-						Text("\(set.rpeString) rpe")
-					}
-				case .distanceAndWeight:
-					HStack {
-						UnitLengthTextField(value: $set.distance)
-						Text(set.distanceString)
-					}
-					HStack {
-						UnitMassTextField(value: $set.value)
-						Text(set.valueString)
-					}
-				case .duration:
-					HStack {
-						TimeIntervalPicker(timeInterval: $set.duration)
-						Text(set.durationString)
-					}
-				case .durationAndWeight:
-					HStack {
-						TimeIntervalPicker(timeInterval: $set.duration)
-						Text(set.durationString)
-					}
-					HStack {
-						UnitMassTextField(value: $set.value)
-						Text(set.valueString)
-					}
-				case .reps:
-					HStack {
-						SimpleTextFieldV2(value: $set.reps)
-						Text("\(set.repsString) reps")
+			VStack(alignment: .leading, spacing: 5) {
+				Group {
+					switch set.category {
+					case .weightAndReps:
+						HStack {
+							UnitMassTextField(value: $set.value)
+							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
+						}
+						HStack {
+							SimpleTextFieldV2(value: $set.reps)
+							Text("\(set.repsString) reps")
+						}
+						HStack {
+							SimpleTextFieldV2(value: $set.rpe)
+							Text("\(set.rpeString) rpe")
+						}
+					case .distanceAndWeight:
+						HStack {
+							UnitLengthTextField(value: $set.distance)
+							Text(set.distanceString)
+						}
+						HStack {
+							UnitMassTextField(value: $set.value)
+							Text(set.valueString)
+						}
+					case .duration:
+						HStack {
+							TimeIntervalPicker(timeInterval: $set.duration)
+							Text(set.durationString)
+						}
+					case .durationAndWeight:
+						HStack {
+							TimeIntervalPicker(timeInterval: $set.duration)
+							Text(set.durationString)
+						}
+						HStack {
+							UnitMassTextField(value: $set.value)
+							Text(set.valueString)
+						}
+					case .reps:
+						HStack {
+							SimpleTextFieldV2(value: $set.reps)
+							Text("\(set.repsString) reps")
+						}
 					}
 				}
 			}

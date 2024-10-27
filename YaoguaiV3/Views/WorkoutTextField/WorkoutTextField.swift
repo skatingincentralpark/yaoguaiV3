@@ -33,13 +33,17 @@ struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 		SimpleTextFieldImpl(value: $value, id: id, keyboardHeight: 300)
 			.focused($focused)
 			.frame(width: 70, height: 30)
-			.background(.yellow)
+			.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
 			.clipShape(RoundedRectangle(cornerRadius: 6))
 			.overlay {
 				RoundedRectangle(cornerRadius: 6)
-					.stroke(focused ? .green : .gray, lineWidth: 3.0)
+					.stroke(focused ? .green : .gray, lineWidth: 2.0)
 			}
 	}
+}
+
+#Preview("Default") {
+	SimpleTextFieldV2(value: .constant(1.0))
 }
 
 struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessStringConvertible {

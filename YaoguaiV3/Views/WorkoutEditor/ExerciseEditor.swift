@@ -23,7 +23,6 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 	
 	var body: some View {
 		VStack(alignment: .leading) {
-			Text("Hey")
 			HStack {
 				Text(exercise.id.hashValue.formatted().prefix(7))
 					.lineLimit(1)
@@ -42,15 +41,13 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 			
 			if exercise.sets.count > 0 {
 				HStack {
-					VStack {
+					VStack(alignment: .leading) {
 						ForEach(Array($exercise.sets.enumerated()), id: \.1.id) { index, set in
 							SetEditor(set: set, exercise: exercise.details, index: index, delete: { _ in
 								exercise.removeSet(set.wrappedValue)
 							})
 							.padding(.leading)
 						}
-						
-						
 					}
 					.overlay(alignment: .leading) {
 						Rectangle()

@@ -35,13 +35,13 @@ import Foundation
 		let currentWorkout = workoutManager.currentWorkout
 		let currentWorkoutId = workoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(currentWorkout == nil, "Expected no current workout on initial load")
 		try #require(currentWorkoutId == nil, "Expected no current workout ID on initial load")
 		try #require(!savedWorkoutExists, "Expected no saved workout file on initial load")
-		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database on initial load")
+		try #require(workoutRecordsInDB.count == 0, "Expected no workout records in the database on initial load")
 	}
 	
 	@MainActor @Test func test_currentWorkoutManagerStartNewWorkout_shouldSaveWorkoutToDbAndDocs() async throws {
@@ -53,13 +53,13 @@ import Foundation
 		let newCurrentWorkout = workoutManager.currentWorkout
 		let newCurrentWorkoutId = workoutManager.currentWorkoutId
 		let newSavedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(newCurrentWorkout != nil, "Expected a workout after starting a workout")
 		try #require(newCurrentWorkoutId != nil, "Expected a workout ID after starting a workout")
 		try #require(newSavedWorkoutExists, "Expected a saved workout file after starting a workout")
-		try #require(workoutRecordsInDB == 1, "Expected 1 workout record in the database after starting a workout")
+		try #require(workoutRecordsInDB.count == 1, "Expected 1 workout record in the database after starting a workout")
 		
 	}
 	
@@ -80,12 +80,12 @@ import Foundation
 		let currentWorkoutId = newWorkoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		try #require(currentWorkout != nil, "Expected current workout after starting a workout")
 		try #require(currentWorkoutId != nil, "Expected current workout ID after starting a workout")
 		try #require(savedWorkoutExists, "Expected saved workout file after starting a workout")
-		try #require(workoutRecordsInDB == 1, "Expected 1 workout record in the database after starting a workout")
+		try #require(workoutRecordsInDB.count == 1, "Expected 1 workout record in the database after starting a workout")
 		try #require(initialWorkoutId == currentWorkoutId, "Expected the initial and current workoutId to be the same")
 	}
 	
@@ -102,13 +102,13 @@ import Foundation
 		let currentWorkoutId = newWorkoutManager.currentWorkoutId
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
 		
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(currentWorkout == nil, "Expected no workout after canceling")
 		try #require(currentWorkoutId == nil, "Expected no current workout ID after canceling")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after canceling")
-		try #require(workoutRecordsInDB == 0, "Expected no workout record in the database after after canceling")
+		try #require(workoutRecordsInDB.count == 0, "Expected no workout record in the database after after canceling")
 	}
 	
 	@MainActor @Test func test_currentWorkoutManagerComplete_shouldSaveValidWorkoutToDbAndShouldRemoveIdFromDocs() async throws {
@@ -131,16 +131,16 @@ import Foundation
 		workoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
-		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
+		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
-		// Todo: maybe we should assert that the relationship exists rather than just querying the record.count
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
 		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
-		try #require(workoutRecordsInDB == 1, "Expected 1 workout record in the database after after completing")
-		try #require(exerciseRecordsInDB == 1, "Expected 1 exercise record in the database after after completing")
+		try #require(workoutRecordsInDB.count == 1, "Expected 1 workout record in the database after after completing")
+		try #require(exerciseRecordsInDB.count == 1, "Expected 1 exercise record in the database after after completing")
+		try #require(workoutRecordsInDB[0].exercises.count == 1, "Expected 1 exercise in the workout record after completing")
 	}
 	
 	@MainActor @Test func test_currentWorkoutManagerComplete_shouldNotSaveInvalidWorkoutToDbAndShouldRemoveIdFromDocs() async throws {
@@ -151,13 +151,13 @@ import Foundation
 		workoutManager.complete()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
 		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
-		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database after after completing")
+		try #require(workoutRecordsInDB.count == 0, "Expected no workout records in the database after after completing")
 	}
 	
 	@MainActor @Test func test_currentWorkoutManagerCancel_shouldDeleteFromDbAndDocs() async throws {
@@ -178,15 +178,15 @@ import Foundation
 		workoutManager.cancel()
 		
 		let savedWorkoutExists = FileManager.default.fileExists(atPath: savePath.path)
-		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext).count
-		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext).count
+		let workoutRecordsInDB = try fetchModel(ofType: WorkoutRecord.self, in: container.mainContext)
+		let exerciseRecordsInDB = try fetchModel(ofType: ExerciseRecord.self, in: container.mainContext)
 		
 		// Then: assert that the initial state is as expected
 		try #require(workoutManager.currentWorkout == nil, "Expected no workout after completing")
 		try #require(workoutManager.currentWorkoutId == nil, "Expected no current workout ID after completing")
 		try #require(!savedWorkoutExists, "Expected no saved workout file after completing")
-		try #require(workoutRecordsInDB == 0, "Expected no workout records in the database after after completing")
-		try #require(exerciseRecordsInDB == 0, "Expected 0 exercise records in the database after after canceling")
+		try #require(workoutRecordsInDB.count == 0, "Expected no workout records in the database after after completing")
+		try #require(exerciseRecordsInDB.count == 0, "Expected 0 exercise records in the database after after canceling")
 	}
 	
 	@MainActor @Test func test_workoutRecordAddExercise_shouldNotAddDuplicates() async throws {

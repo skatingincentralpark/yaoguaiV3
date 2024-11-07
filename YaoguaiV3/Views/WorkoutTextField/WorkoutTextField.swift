@@ -110,7 +110,7 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 					},
 					hideKeyboard: { textField.endEditing(true) },
 					keyboardHeight: keyboardHeight,
-					backgroundColor: .white
+					backgroundColor: .gray
 				))
 			
 			let animalKeyboardView = AnimalKeyboardViewController.view!

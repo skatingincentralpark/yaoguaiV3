@@ -70,13 +70,13 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 		
 		func setupKeyboard() {
 			let inputView = UIInputView()
+			let valueIsDouble = V("1") is Double
 			
 			let AnimalKeyboardViewController = UIHostingController(
-				rootView: NumericKeyboardView(
+				rootView: WorkoutKeyboard(
 					insertText: { newText in
 						if let selectedTextRange = textField.selectedTextRange {
 							let currentText = textField.text ?? ""
-							let valueIsDouble = V("1") is Double
 
 							if valueIsDouble {
 								if newText == "." {
@@ -110,7 +110,18 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 					},
 					hideKeyboard: { textField.endEditing(true) },
 					keyboardHeight: keyboardHeight,
-					backgroundColor: .gray
+					backgroundColor: .gray,
+					valueIsDouble: valueIsDouble,
+					minus: {
+						if let newValue = value {
+							value = newValue - 1
+						}
+					},
+					plus: {
+						if let newValue = value {
+							value = newValue + 1
+						}
+					}
 				))
 			
 			let animalKeyboardView = AnimalKeyboardViewController.view!

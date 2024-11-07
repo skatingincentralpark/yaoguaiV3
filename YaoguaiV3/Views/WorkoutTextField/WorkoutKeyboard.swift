@@ -1,20 +1,23 @@
 import SwiftUI
 
-struct NumericKeyboardView: View {
+struct WorkoutKeyboard: View {
 	var insertText: (String) -> Void
 	var deleteText: () -> Void
 	var hideKeyboard: () -> Void
+	var minus: () -> Void
+	var plus: () -> Void
+	var valueIsDouble: Bool
 	
 	let keyboardHeight: CGFloat
 	var backgroundColor: Color
 	var spacing: CGFloat
 	
-	private let numberList = [
-		"1", "4", "7",
-		".", "2", "5",
-		"8", "0", "3",
-		"6", "9"
-	]
+	private var numbers1 = [ "1", "4", "7" ]
+	private var numbers2 = [ "2", "5", "8", "0", "3", "6", "9" ]
+	
+	@State private var rpeSelectorShowing: Bool = false
+	
+	@Namespace private var animation
 	
 	var rows: [GridItem] {
 		[
@@ -35,7 +38,10 @@ struct NumericKeyboardView: View {
 		hideKeyboard: @escaping () -> Void,
 		keyboardHeight: CGFloat,
 		backgroundColor: Color,
-		spacing: CGFloat = 5
+		spacing: CGFloat = 5,
+		valueIsDouble: Bool,
+		minus: @escaping () -> Void = {},
+		plus: @escaping () -> Void = {}
 	) {
 		self.insertText = insertText
 		self.deleteText = deleteText
@@ -43,11 +49,36 @@ struct NumericKeyboardView: View {
 		self.keyboardHeight = keyboardHeight
 		self.backgroundColor = backgroundColor
 		self.spacing = spacing
+		self.valueIsDouble = valueIsDouble
+		self.minus = minus
+		self.plus = plus
 	}
 	
 	var body: some View {
 		LazyHGrid(rows: rows, alignment: .top, spacing: spacing, content: {
-			ForEach(numberList, id: \.self) { number in
+			ForEach(numbers1, id: \.self) { number in
+				Button(action: {
+					insertText(number)
+				}, label: {
+					Text(number)
+						.numericButtonStyle(length: length)
+						.font(.system(size: 32))
+				})
+			}
+			
+			if valueIsDouble {
+				Button(action: {
+					insertText(".")
+				}, label: {
+					Text(".")
+						.numericButtonStyle(length: length)
+						.font(.system(size: 32))
+				})
+			} else {
+				Color.clear
+			}
+			
+			ForEach(numbers2, id: \.self) { number in
 				Button(action: {
 					insertText(number)
 				}, label: {
@@ -67,19 +98,24 @@ struct NumericKeyboardView: View {
 					.numericButtonStyle(length: length)
 			})
 			
-			Button {} label: {
+			Button {
+				withAnimation(.spring(duration: 0.1)) {
+					rpeSelectorShowing.toggle()
+				}
+			} label: {
 				Text("RPE")
 					.numericButtonStyle(length: length)
+//					.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
 			}
 			
 			HStack(spacing: 0 ) {
-				Button(action: {}, label: {
+				Button(action: minus, label: {
 					Image(systemName: "minus")
 						.frame(maxWidth: .infinity, maxHeight: .infinity)
 						.background(.orange)
 				})
 				
-				Button(action: {}, label: {
+				Button(action: plus, label: {
 					Image(systemName: "plus")
 						.frame(maxWidth: .infinity, maxHeight: .infinity)
 						.background(.orange)
@@ -94,7 +130,6 @@ struct NumericKeyboardView: View {
 					.background(.orange)
 					.clipShape(RoundedRectangle(cornerRadius: 8))
 			}
-			
 		})
 		.bold()
 		.padding(.horizontal, 5)
@@ -103,6 +138,29 @@ struct NumericKeyboardView: View {
 		.frame(height: keyboardHeight)
 		.frame(maxWidth: .infinity)
 		.background(backgroundColor)
+		.overlay {
+			if !rpeSelectorShowing {
+				ZStack {
+					Color.green
+						.opacity(1)
+					
+					VStack {
+						Button {
+							withAnimation(.spring(duration: 0.1)) {
+								rpeSelectorShowing.toggle()
+							}
+						} label: {
+							Text("RPE")
+								.numericButtonStyle(length: length)
+								.frame(height: 50)
+						}
+					}
+					.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+					.background(.blue)
+				}
+//				.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
+			}
+		}
 	}
 }
 
@@ -125,13 +183,24 @@ extension View {
 	}
 }
 
-
-#Preview(traits: .sizeThatFitsLayout) {
-	NumericKeyboardView(
+#Preview("Without Decimal", traits: .sizeThatFitsLayout) {
+	WorkoutKeyboard(
 		insertText: { _ in },
 		deleteText: { },
 		hideKeyboard: { },
 		keyboardHeight: 300,
-		backgroundColor: Color.gray
+		backgroundColor: Color.gray,
+		valueIsDouble: false
+	)
+}
+
+#Preview("With Decimal", traits: .sizeThatFitsLayout) {
+	WorkoutKeyboard(
+		insertText: { _ in },
+		deleteText: { },
+		hideKeyboard: { },
+		keyboardHeight: 300,
+		backgroundColor: Color.gray,
+		valueIsDouble: true
 	)
 }

@@ -105,7 +105,7 @@ struct WorkoutKeyboard: View {
 			} label: {
 				Text("RPE")
 					.numericButtonStyle(length: length)
-//					.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
+					.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
 			}
 			
 			HStack(spacing: 0 ) {
@@ -139,26 +139,33 @@ struct WorkoutKeyboard: View {
 		.frame(maxWidth: .infinity)
 		.background(backgroundColor)
 		.overlay {
-			if !rpeSelectorShowing {
+			if rpeSelectorShowing {
 				ZStack {
-					Color.green
-						.opacity(1)
+					Color.purple
+						.opacity(0.95)
 					
-					VStack {
-						Button {
-							withAnimation(.spring(duration: 0.1)) {
-								rpeSelectorShowing.toggle()
+					VStack(alignment: .trailing) {
+						HStack {
+							Spacer()
+							
+							Button {
+								withAnimation(.spring(duration: 0.1)) {
+									rpeSelectorShowing.toggle()
+								}
+							} label: {
+								Image(systemName: "xmark.circle")
+									.numericButtonStyle(length: length)
 							}
-						} label: {
-							Text("RPE")
-								.numericButtonStyle(length: length)
-								.frame(height: 50)
+							.frame(height: 50, alignment: .topTrailing)
+							.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
 						}
 					}
-					.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
-					.background(.blue)
 				}
-//				.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
+				.padding(.horizontal, 5)
+				.padding(.top, 32)
+				.padding(.bottom, 16)
+				.frame(maxWidth: .infinity, maxHeight: .infinity)
+				.background(.purple)
 			}
 		}
 	}

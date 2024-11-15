@@ -1,36 +1,25 @@
 import SwiftUI
 
 struct WorkoutKeyboard: View {
-	var insertText: (String) -> Void
-	var deleteText: () -> Void
-	var hideKeyboard: () -> Void
-	var minus: () -> Void
-	var plus: () -> Void
-	var valueIsDouble: Bool
-	
+	let insertText: (String) -> Void
+	let deleteText: () -> Void
+	let hideKeyboard: () -> Void
+	let minus: () -> Void
+	let plus: () -> Void
+	let valueIsDouble: Bool
 	let keyboardHeight: CGFloat
-	var backgroundColor: Color
-	var spacing: CGFloat
+	let backgroundColor: Color
+	let spacing: CGFloat
+	let rows: [GridItem]
 	
-	private var numbers1 = [ "1", "4", "7" ]
-	private var numbers2 = [ "2", "5", "8", "0", "3", "6", "9" ]
+	private let numbersRow1 = [1, 2, 3]
+	private let numbersRow2 = [3, 4, 5]
+	private let numbersRow3 = [7, 8, 9]
+	private let numbersRow4 = [0]
 	
 	@State private var rpeSelectorShowing: Bool = false
 	
 	@Namespace private var animation
-	
-	var rows: [GridItem] {
-		[
-			.init(.flexible(minimum: 0, maximum: .infinity), spacing: spacing),
-			.init(.flexible(minimum: 0, maximum: .infinity), spacing: spacing),
-			.init(.flexible(minimum: 0, maximum: .infinity), spacing: spacing),
-			.init(.flexible(minimum: 0, maximum: .infinity), spacing: spacing),
-		]
-	}
-	
-	let length: (CGFloat, Axis) -> CGFloat = { length, axis in
-		return (length - 25) / 4 // essentially rows.count
-	}
 	
 	init(
 		insertText: @escaping (String) -> Void,
@@ -52,85 +41,82 @@ struct WorkoutKeyboard: View {
 		self.valueIsDouble = valueIsDouble
 		self.minus = minus
 		self.plus = plus
+		self.rows = Array(repeating: GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: spacing), count: 4)
 	}
 	
 	var body: some View {
-		LazyHGrid(rows: rows, alignment: .top, spacing: spacing, content: {
-			ForEach(numbers1, id: \.self) { number in
-				Button(action: {
-					insertText(number)
-				}, label: {
-					Text(number)
-						.numericButtonStyle(length: length)
-						.font(.system(size: 32))
-				})
-			}
-			
-			if valueIsDouble {
-				Button(action: {
-					insertText(".")
-				}, label: {
-					Text(".")
-						.numericButtonStyle(length: length)
-						.font(.system(size: 32))
-				})
-			} else {
-				Color.clear
-			}
-			
-			ForEach(numbers2, id: \.self) { number in
-				Button(action: {
-					insertText(number)
-				}, label: {
-					Text(number)
-						.numericButtonStyle(length: length)
-						.font(.system(size: 32))
-				})
-			}
-			
-			Button(action: deleteText, label: {
-				Image(systemName: "delete.backward")
-					.numericButtonStyle(length: length)
-			})
-			
-			Button(action: hideKeyboard, label: {
-				Image(systemName: "keyboard.chevron.compact.down")
-					.numericButtonStyle(length: length)
-			})
-			
-			Button {
-				withAnimation(.spring(duration: 0.1)) {
-					rpeSelectorShowing.toggle()
-				}
-			} label: {
-				Text("RPE")
-					.numericButtonStyle(length: length)
-					.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
-			}
-			
-			HStack(spacing: 0 ) {
-				Button(action: minus, label: {
-					Image(systemName: "minus")
-						.frame(maxWidth: .infinity, maxHeight: .infinity)
-						.background(.orange)
+		LazyVGrid(
+			columns: rows,
+			alignment: .leading,
+			spacing: spacing,
+			content: {
+				// ROW 1
+				NumericButtons(numbers: numbersRow1, insertText: insertText)
+				
+				Button(action: hideKeyboard, label: {
+					Image(systemName: "keyboard.chevron.compact.down")
+						.workoutKeyboardStyle()
 				})
 				
-				Button(action: plus, label: {
-					Image(systemName: "plus")
+				// ROW 2
+				NumericButtons(numbers: numbersRow2, insertText: insertText)
+				
+				Button {
+					withAnimation(.spring(duration: 0.1)) {
+						rpeSelectorShowing.toggle()
+					}
+				} label: {
+					Text("RPE")
+						.workoutKeyboardStyle()
+						.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
+				}
+				
+				// ROW 3
+				NumericButtons(numbers: numbersRow3, insertText: insertText)
+				
+				HStack(spacing: 0 ) {
+					Button(action: minus, label: {
+						Image(systemName: "minus")
+							.frame(maxWidth: .infinity, maxHeight: .infinity)
+							.background(.orange)
+					})
+					
+					Button(action: plus, label: {
+						Image(systemName: "plus")
+							.frame(maxWidth: .infinity, maxHeight: .infinity)
+							.background(.orange)
+					})
+				}
+				.workoutKeyboardStyle(backgroundColor: .clear)
+				
+				// ROW 4
+				if valueIsDouble {
+					Button(action: {
+						insertText(".")
+					}, label: {
+						Text(".")
+							.workoutKeyboardStyle()
+							.font(.system(size: 32))
+					})
+				} else {
+					Color.clear
+				}
+				
+				NumericButtons(numbers: numbersRow4, insertText: insertText)
+				
+				Button(action: deleteText, label: {
+					Image(systemName: "delete.backward")
+						.workoutKeyboardStyle()
+				})
+				
+				Button {} label: {
+					Text("Next")
 						.frame(maxWidth: .infinity, maxHeight: .infinity)
 						.background(.orange)
-				})
+						.clipShape(RoundedRectangle(cornerRadius: 8))
+				}
 			}
-			.numericButtonStyle(length: length, backgroundColor: .clear)
-			
-			Button {} label: {
-				Text("Next")
-					.frame(maxWidth: .infinity, maxHeight: .infinity)
-					.containerRelativeFrame(.horizontal, length)
-					.background(.orange)
-					.clipShape(RoundedRectangle(cornerRadius: 8))
-			}
-		})
+		)
 		.bold()
 		.padding(.horizontal, 5)
 		.padding(.top, 32)
@@ -154,7 +140,7 @@ struct WorkoutKeyboard: View {
 								}
 							} label: {
 								Image(systemName: "xmark.circle")
-									.numericButtonStyle(length: length)
+									.workoutKeyboardStyle()
 							}
 							.frame(height: 50, alignment: .topTrailing)
 							.matchedGeometryEffect(id: "KeyboardChevronDownButton", in: animation)
@@ -169,24 +155,40 @@ struct WorkoutKeyboard: View {
 			}
 		}
 	}
+	
+	struct NumericButtons: View {
+		let numbers: [Int]
+		var labels: [String] { numbers.map { String($0) } }
+		let insertText: (String) -> Void
+		
+		var body: some View {
+			ForEach(labels, id: \.self) { number in
+				Button(action: {
+					insertText(number)
+				}, label: {
+					Text(number)
+						.workoutKeyboardStyle()
+						.font(.system(size: 32))
+				})
+			}
+		}
+	}
 }
 
-fileprivate struct NumericButtonStyle: ViewModifier {
-	let length: (CGFloat, Axis) -> CGFloat
+fileprivate struct WorkoutButtonStyle: ViewModifier {
 	let backgroundColor: Color
-
+	
 	func body(content: Content) -> some View {
 		content
-			.frame(maxHeight: .infinity)
-			.containerRelativeFrame(.horizontal, length)
+			.frame(maxWidth: .infinity, minHeight: 50, maxHeight: .infinity)
 			.background(backgroundColor)
 			.clipShape(RoundedRectangle(cornerRadius: 8))
 	}
 }
 
 extension View {
-	fileprivate func numericButtonStyle(length: @escaping (CGFloat, Axis) -> CGFloat, backgroundColor: Color = .orange) -> some View {
-		self.modifier(NumericButtonStyle(length: length, backgroundColor: backgroundColor))
+	fileprivate func workoutKeyboardStyle(backgroundColor: Color = .orange) -> some View {
+		self.modifier(WorkoutButtonStyle(backgroundColor: backgroundColor))
 	}
 }
 

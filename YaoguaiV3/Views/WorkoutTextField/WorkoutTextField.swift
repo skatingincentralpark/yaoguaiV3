@@ -30,15 +30,19 @@ struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 	@FocusState private var focused: Bool
 	
 	var body: some View {
-		SimpleTextFieldImpl(value: $value, id: id, keyboardHeight: 300)
-			.focused($focused)
-			.frame(width: 70, height: 30)
-			.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
-			.clipShape(RoundedRectangle(cornerRadius: 6))
-			.overlay {
-				RoundedRectangle(cornerRadius: 6)
-					.stroke(focused ? .green : .gray, lineWidth: 2.0)
-			}
+		SimpleTextFieldImpl(
+			value: $value,
+			id: id,
+			keyboardHeight: 300
+		)
+		.focused($focused)
+		.frame(width: 70, height: 30)
+		.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
+		.clipShape(RoundedRectangle(cornerRadius: 6))
+		.overlay {
+			RoundedRectangle(cornerRadius: 6)
+				.stroke(focused ? .green : .gray, lineWidth: 2.0)
+		}
 	}
 }
 
@@ -71,57 +75,64 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 		func setupKeyboard() {
 			let inputView = UIInputView()
 			let valueIsDouble = V("1") is Double
+			let insertText: (String) -> Void = { newText in
+				if let selectedTextRange = textField.selectedTextRange {
+					let currentText = textField.text ?? ""
+					
+					if valueIsDouble {
+						if newText == "." {
+							if currentText.contains(".") && !textField.isAllTextSelected {
+								return
+							}
+							textField.replace(selectedTextRange, withText: newText)
+						} else {
+							textField.replace(selectedTextRange, withText: newText)
+							if let updatedText = textField.text {
+								value = V(updatedText)
+							}
+						}
+					} else {
+						if newText == "." {
+							return
+						}
+						textField.replace(selectedTextRange, withText: newText)
+						if let updatedText = textField.text {
+							value = V(updatedText)
+						}
+					}
+				}
+			}
+			
+			let deleteText: () -> Void = {
+				textField.deleteBackward()
+				
+				if let newText = textField.text {
+					value = V(newText)
+				}
+			}
+			
+			let minus: () -> Void = {
+				if let newValue = value {
+					value = newValue - 1
+				}
+			}
+			
+			let plus: () -> Void = {
+				if let newValue = value {
+					value = newValue + 1
+				}
+			}
 			
 			let AnimalKeyboardViewController = UIHostingController(
 				rootView: WorkoutKeyboard(
-					insertText: { newText in
-						if let selectedTextRange = textField.selectedTextRange {
-							let currentText = textField.text ?? ""
-
-							if valueIsDouble {
-								if newText == "." {
-									if currentText.contains(".") && !textField.isAllTextSelected {
-										return
-									}
-									textField.replace(selectedTextRange, withText: newText)
-								} else {
-									textField.replace(selectedTextRange, withText: newText)
-									if let updatedText = textField.text {
-										value = V(updatedText)
-									}
-								}
-							} else {
-								if newText == "." {
-									return
-								}
-								textField.replace(selectedTextRange, withText: newText)
-								if let updatedText = textField.text {
-									value = V(updatedText)
-								}
-							}
-						}
-					},
-					deleteText: {
-						textField.deleteBackward()
-						
-						if let newText = textField.text {
-							value = V(newText)
-						}
-					},
+					insertText: insertText,
+					deleteText: deleteText,
 					hideKeyboard: { textField.endEditing(true) },
 					keyboardHeight: keyboardHeight,
 					backgroundColor: .gray,
 					valueIsDouble: valueIsDouble,
-					minus: {
-						if let newValue = value {
-							value = newValue - 1
-						}
-					},
-					plus: {
-						if let newValue = value {
-							value = newValue + 1
-						}
-					}
+					minus: minus,
+					plus: plus
 				))
 			
 			let animalKeyboardView = AnimalKeyboardViewController.view!
@@ -157,7 +168,10 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 	}
 	
 	// Updates the state of the specified view with new information from SwiftUI.
-	func updateUIView(_ uiView: UIView, context: Context) {
+	func updateUIView(
+		_ uiView: UIView,
+		context: Context
+	) {
 		if let textField = uiView.subviews.first(where: { $0 is UITextField }) as? UITextField {
 			if let value = value {
 				// Convert the value to a Double
@@ -201,7 +215,11 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 		// E.g. in simulator and your typing on your mac keyboard
 		// It attempts to convert the updated string (newValue) to the numeric type V.
 		// It ensures that the SwiftUI binding of `value` is updated
-		func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+		func textField(
+			_ textField: UITextField,
+			shouldChangeCharactersIn range: NSRange,
+			replacementString string: String
+		) -> Bool {
 			let text = textField.text as NSString?
 			let newValue = text?.replacingCharacters(in: range, with: string)
 			
@@ -224,7 +242,10 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 			return false
 		}
 		
-		func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
+		func textFieldDidEndEditing(
+			_ textField: UITextField,
+			reason: UITextField.DidEndEditingReason
+		) {
 			if reason == .committed {
 				textField.resignFirstResponder()
 			}

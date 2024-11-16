@@ -23,11 +23,15 @@ struct WorkoutRecordEditorWrapper: View {
 	@Environment(CurrentWorkoutManager.self) private var workoutManager
 	@State private var viewModel: ViewModel
 	
-	init(workoutId: PersistentIdentifier,
-		 in container: ModelContainer,
-		 isNewWorkout: Bool = false
+	init(
+		workoutId: PersistentIdentifier,
+		in container: ModelContainer,
+		isNewWorkout: Bool = false
 	) {
-		self.viewModel = ViewModel(workoutId: workoutId, in: container, isNewWorkout: isNewWorkout)
+		self.viewModel = ViewModel(
+			workoutId: workoutId,
+			in: container, isNewWorkout: isNewWorkout
+		)
 	}
 	
 	var body: some View {
@@ -101,9 +105,10 @@ extension WorkoutRecordEditorWrapper {
 		let modelContext: ModelContext
 		let isNewWorkout: Bool
 		
-		init(workoutId: PersistentIdentifier,
-			 in container: ModelContainer,
-			 isNewWorkout: Bool = false
+		init(
+			workoutId: PersistentIdentifier,
+			in container: ModelContainer,
+			isNewWorkout: Bool = false
 		) {
 			self.modelContext = ModelContext(container)
 			self.modelContext.autosaveEnabled = isNewWorkout ? true : false

@@ -14,7 +14,10 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 	@State private var exerciseListSheetShown = false
 	@State private var currentlyDragged: T.ExerciseType?
 	
-	init(workout: T, modelContext: ModelContext) {
+	init(
+		workout: T,
+		modelContext: ModelContext
+	) {
 		self.workout = workout
 		self.modelContext = modelContext
 	}
@@ -26,21 +29,28 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 				Button("Add Exercise") {
 					exerciseListSheetShown = true
 				}
-				ExerciseList(workout: workout, modelContext: modelContext, currentlyDragged: $currentlyDragged)
+				ExerciseList(
+					workout: workout,
+					modelContext: modelContext,
+					currentlyDragged: $currentlyDragged
+				)
 			}
 			.padding()
 			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 		}
 		.reorderableForEachContainer(active: $currentlyDragged)
-		.sheet(isPresented: $exerciseListSheetShown, content: {
-			ExerciseDetailsList { exerciseDetails in
-				if let exercise = modelContext.model(for: exerciseDetails.id) as? Exercise {
-					workout.addExercise(details: exercise)
-				} else {
-					fatalError("Exercise not found.")
+		.sheet(
+			isPresented: $exerciseListSheetShown,
+			content: {
+				ExerciseDetailsList { exerciseDetails in
+					if let exercise = modelContext.model(for: exerciseDetails.id) as? Exercise {
+						workout.addExercise(details: exercise)
+					} else {
+						fatalError("Exercise not found.")
+					}
 				}
 			}
-		})
+		)
 	}
 	
 	struct ExerciseList: View {
@@ -49,7 +59,10 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 		@Binding var currentlyDragged: T.ExerciseType?
 		
 		var body: some View {
-			ReorderableForEach(workout.orderedExercises, active: $currentlyDragged) { exercise in
+			ReorderableForEach(
+				workout.orderedExercises,
+				active: $currentlyDragged
+			) { exercise in
 				ExerciseEditor(
 					exercise: exercise,
 					delete: {

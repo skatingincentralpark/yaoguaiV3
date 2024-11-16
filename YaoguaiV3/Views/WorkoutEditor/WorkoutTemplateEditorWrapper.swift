@@ -17,11 +17,16 @@ struct WorkoutTemplateEditorWrapper: View {
 	@Environment(\.dismiss) var dismiss
 	@State private var viewModel: ViewModel
 	
-	init(workoutId: PersistentIdentifier,
-		 in container: ModelContainer,
-		 isNewWorkout: Bool = false
+	init(
+		workoutId: PersistentIdentifier,
+		in container: ModelContainer,
+		isNewWorkout: Bool = false
 	) {
-		self.viewModel = ViewModel(workoutId: workoutId, in: container, isNewWorkout: isNewWorkout)
+		self.viewModel = ViewModel(
+			workoutId: workoutId,
+			in: container,
+			isNewWorkout: isNewWorkout
+		)
 	}
 	
 	var body: some View {
@@ -95,9 +100,10 @@ extension WorkoutTemplateEditorWrapper {
 		let isNewWorkout: Bool
 		let alertManager = AlertManager.shared
 		
-		init(workoutId: PersistentIdentifier,
-			 in container: ModelContainer,
-			 isNewWorkout: Bool = false
+		init(
+			workoutId: PersistentIdentifier,
+			in container: ModelContainer,
+			isNewWorkout: Bool = false
 		) {
 			self.modelContext = ModelContext(container)
 			self.modelContext.autosaveEnabled = false

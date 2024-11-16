@@ -15,7 +15,12 @@ struct SetEditor<T: SetCommon>: View {
 	
 	var delete: (T) -> Void
 	
-	init(set: Binding<T>, exercise: Exercise?, index: Int, delete: @escaping (T) -> Void) {
+	init(
+		set: Binding<T>,
+		exercise: Exercise?,
+		index: Int,
+		delete: @escaping (T) -> Void
+	) {
 		self._set = set
 		self.exercise = exercise
 		self.index = index

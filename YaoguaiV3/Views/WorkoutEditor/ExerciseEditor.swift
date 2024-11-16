@@ -15,7 +15,11 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 	
 	@State private var replaceExerciseSheetPresented = false
 	
-	init(exercise: T, delete: @escaping () -> Void, modelContext: ModelContext) {
+	init(
+		exercise: T,
+		delete: @escaping () -> Void,
+		modelContext: ModelContext
+	) {
 		self.exercise = exercise
 		self.delete = delete
 		self.modelContext = modelContext
@@ -43,9 +47,14 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 				HStack {
 					VStack(alignment: .leading) {
 						ForEach(Array($exercise.sets.enumerated()), id: \.1.id) { index, set in
-							SetEditor(set: set, exercise: exercise.details, index: index, delete: { _ in
-								exercise.removeSet(set.wrappedValue)
-							})
+							SetEditor(
+								set: set,
+								exercise: exercise.details,
+								index: index,
+								delete: { _ in
+									exercise.removeSet(set.wrappedValue)
+								}
+							)
 							.padding(.leading)
 						}
 					}
@@ -57,7 +66,7 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 				.padding(.leading)
 			}
 		}
-		.sheet(isPresented: $replaceExerciseSheetPresented) {				
+		.sheet(isPresented: $replaceExerciseSheetPresented) {
 			ExerciseDetailsList(
 				onSelect: {
 					if let replacementExercise = modelContext.model(for: $0.id) as? Exercise {

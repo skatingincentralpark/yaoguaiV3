@@ -49,7 +49,48 @@ extension WorkoutCommon {
 	var orderedExercises: [ExerciseType] {
 		exercises.sorted(by: { $0.order < $1.order })
 	}
+	
+	/// Maps all the visible textFields that can be cycled via WorkoutKeyboard "next".
+	var setIdsAndInputIndexes: [(UUID, [Int])] {
+		let sortedExercises = exercises.sorted(by: { $0.order < $1.order })
+		var counter = 0
+		var results: [(UUID, [Int])] = []
+		
+		sortedExercises.forEach { exercise in
+			exercise.sets.forEach { set in
+				let inputIndexes = generateInputIndexes(for: exercise.details?.category, counter: &counter)
+				results.append((set.id, inputIndexes))
+			}
+		}
+		
+		return results
+	}
+
+	/// Generates input indexes for a given exercise category, updating the counter.
+	private func generateInputIndexes(for category: ExerciseCategory?, counter: inout Int) -> [Int] {
+		let inputsNeeded: Int
+		
+		switch category {
+		case .weightAndReps:
+			inputsNeeded = 3
+		case .reps, .duration:
+			inputsNeeded = 1
+		case .durationAndWeight, .distanceAndWeight:
+			inputsNeeded = 2
+		case .none:
+			return []
+		}
+		
+		let inputIndexes = (0..<inputsNeeded).map { _ in
+			let index = counter
+			counter += 1
+			return index
+		}
+		
+		return inputIndexes
+	}
 }
+
 
 enum ExerciseCategory: String, Codable, CaseIterable {
 	case weightAndReps

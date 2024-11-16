@@ -71,7 +71,6 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 					},
 					modelContext: modelContext
 				)
-				.padding(.bottom)
 			} moveAction: { indices, newOffset in
 				var s = workout.exercises.sorted(by: { $0.order < $1.order })
 				s.move(fromOffsets: indices, toOffset: newOffset)

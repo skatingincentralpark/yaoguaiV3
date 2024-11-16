@@ -66,6 +66,8 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 				.padding(.leading)
 			}
 		}
+		.padding()
+		.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
 		.sheet(isPresented: $replaceExerciseSheetPresented) {
 			ExerciseDetailsList(
 				onSelect: {

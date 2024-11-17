@@ -78,6 +78,7 @@ struct SetRecord: SetCommon {
 	var workout: WorkoutRecord?
 	var sets: [SetRecord] = []
 	var order: Int = 0
+	var supersetGroup: SupersetGroup?
 	
 	init() {}
 }

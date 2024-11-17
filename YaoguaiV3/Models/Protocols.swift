@@ -22,6 +22,11 @@ protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	func removeExercise(_ exercise: ExerciseType)
 }
 
+enum ExerciseToRender<T: ExerciseCommon> {
+	case single(T)
+	case group([T])
+}
+
 extension WorkoutCommon {
 	/// Such as adding a WorkoutRecord
 	func addExercise(details: Exercise) {
@@ -48,6 +53,21 @@ extension WorkoutCommon {
 	
 	var orderedExercises: [ExerciseType] {
 		exercises.sorted(by: { $0.order < $1.order })
+	}
+	
+	var exercisesToRender: [ExerciseToRender<ExerciseType>] {
+		/// Groups into a dictionary, they key can be a UUID or nil if there's no supersetGroup
+		let groupedExercises = Dictionary(grouping: orderedExercises) { $0.supersetGroup?.id }
+		
+		/// Transform the groups into `ExerciseToRender` values
+		return groupedExercises.flatMap { key, group in
+			 if key == nil {
+				 /// Treat exercises with `nil` supersetGroup as singles
+				 return group.map { ExerciseToRender.single($0) }
+			 } else {
+				 return [.group(group)] // Group of exercises
+			 }
+		 }
 	}
 	
 	/// Maps all the visible textFields that can be cycled via WorkoutKeyboard "next".
@@ -124,6 +144,7 @@ protocol ExerciseCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	var workout: (WorkoutType)? { get set }
 	var sets: [SetType] { get set }
 	var order: Int { get set }
+	var supersetGroup: SupersetGroup? { get set }
 	
 	func addSet()
 	func removeSet(_ set: SetType)

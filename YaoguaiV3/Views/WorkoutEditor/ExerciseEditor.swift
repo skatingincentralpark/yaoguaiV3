@@ -28,18 +28,31 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 	var body: some View {
 		VStack(alignment: .leading) {
 			HStack {
-				Text(exercise.id.hashValue.formatted().prefix(7))
-					.lineLimit(1)
-					.padding(.horizontal)
-					.background(.bar)
 				Text(exercise.details?.name ?? "")
-				Button("Delete", role: .destructive, action: delete)
-				Button("Replace", role: .none, action: {
-					replaceExerciseSheetPresented = true
-				})
 				Spacer()
-				Button("Add Set") {
+				
+				Button {
 					exercise.addSet()
+				} label: {
+					Image(systemName: "plus.circle.fill")
+						.aspectRatio(1, contentMode: .fit)
+				}
+
+				
+				Menu {
+					Button(action: {
+						replaceExerciseSheetPresented = true
+					}) {
+						Text("Replace")
+						Text("Retain sets but switch the exercise.")
+					}
+					
+					Button(role: .destructive, action: delete) {
+						Text("Remove")
+						Text("Remove this exercise from this workout.")
+					}
+				} label: {
+					Image(systemName: "ellipsis")
 				}
 			}
 			
@@ -68,6 +81,7 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 		}
 		.padding()
 		.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
+		.clipShape(RoundedRectangle(cornerRadius: 8))
 		.sheet(isPresented: $replaceExerciseSheetPresented) {
 			ExerciseDetailsList(
 				onSelect: {

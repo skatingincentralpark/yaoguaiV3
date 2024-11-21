@@ -81,9 +81,7 @@ public struct ReorderableForEach<Item: Reorderable, Content: View, Preview: View
 					active: $active,
 					hasChangedLocation: $hasChangedLocation
 				) { from, to in
-					withAnimation(.bouncy(duration: 0.4)) {
-						moveAction(from, to)
-					}
+					moveAction(from, to)
 				}
 			)
 	}

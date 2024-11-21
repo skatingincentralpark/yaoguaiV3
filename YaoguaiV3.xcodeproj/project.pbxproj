@@ -40,7 +40,6 @@
 		A1C5E76B2CAF4AE600C9B902 /* WorkoutRecordList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E76A2CAF4AE600C9B902 /* WorkoutRecordList.swift */; };
 		A1C5E7782CB39C4F00C9B902 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E7772CB39C4F00C9B902 /* Alert.swift */; };
 		A1C5E77C2CB39CA500C9B902 /* AlertList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E77B2CB39CA500C9B902 /* AlertList.swift */; };
-		A1DC911A2CE97A55004E8EB3 /* SupersetGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DC91192CE97A55004E8EB3 /* SupersetGroup.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -89,7 +88,6 @@
 		A1C5E76A2CAF4AE600C9B902 /* WorkoutRecordList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRecordList.swift; sourceTree = "<group>"; };
 		A1C5E7772CB39C4F00C9B902 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		A1C5E77B2CB39CA500C9B902 /* AlertList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertList.swift; sourceTree = "<group>"; };
-		A1DC91192CE97A55004E8EB3 /* SupersetGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupersetGroup.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -177,7 +175,6 @@
 				A11F26812C3AA80000FD971E /* Record.swift */,
 				A13E11092C93A7DD0074BC49 /* Exercise.swift */,
 				A13E11052C90F73A0074BC49 /* Protocols.swift */,
-				A1DC91192CE97A55004E8EB3 /* SupersetGroup.swift */,
 				A13E11072C90F7430074BC49 /* Template.swift */,
 				A1C5E7772CB39C4F00C9B902 /* Alert.swift */,
 			);
@@ -378,7 +375,6 @@
 				A13E11082C90F7430074BC49 /* Template.swift in Sources */,
 				A1C5E7512CA0289C00C9B902 /* TimeIntervalPicker.swift in Sources */,
 				A11F26882C3E90D500FD971E /* Dashboard.swift in Sources */,
-				A1DC911A2CE97A55004E8EB3 /* SupersetGroup.swift in Sources */,
 				A1802C282C7547C700272B66 /* SetEditor.swift in Sources */,
 				A1C5E7572CA7A19100C9B902 /* ExerciseDetailsEditor.swift in Sources */,
 				A1802C462C829DB500272B66 /* Collection.swift in Sources */,

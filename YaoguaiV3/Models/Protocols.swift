@@ -9,6 +9,12 @@ import Foundation
 import Observation
 import SwiftData
 
+struct SupersetGroup: Identifiable, Codable {
+	var id = UUID()
+	var endTimer: TimeInterval? // optionally, the timer that runs at the end of the group
+	var order: Int // This will take precedence over the individual exercise's order
+}
+
 protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	associatedtype ExerciseType: ExerciseCommon
 	
@@ -22,7 +28,41 @@ protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	func removeExercise(_ exercise: ExerciseType)
 }
 
-enum ExerciseToRender<T: ExerciseCommon> {
+struct OrderedExerciseToRender<T: ExerciseCommon>: Reorderable, Comparable {
+	let exerciseToRender: ExerciseToRender<T>
+	
+	var id: PersistentIdentifier {
+		switch self.exerciseToRender {
+		case .group(let exercises):
+			return exercises.first!.persistentModelID
+		case .single(let exercise):
+			return exercise.persistentModelID
+		}
+	}
+	
+	var order: Int {
+		switch self.exerciseToRender {
+		case .group(let exercises):
+			return exercises.first?.supersetGroup?.order ?? 0
+		case .single(let exercise):
+			return exercise.order
+		}
+	}
+	
+	init(exerciseToRender: ExerciseToRender<T>) {
+		self.exerciseToRender = exerciseToRender
+	}
+	
+	static func == (lhs: OrderedExerciseToRender<T>, rhs: OrderedExerciseToRender<T>) -> Bool {
+		return lhs.exerciseToRender == rhs.exerciseToRender
+	}
+	
+	static func < (lhs: OrderedExerciseToRender<T>, rhs: OrderedExerciseToRender<T>) -> Bool {
+		return lhs.order < rhs.order
+	}
+}
+
+enum ExerciseToRender<T: ExerciseCommon>: Equatable {
 	case single(T)
 	case group([T])
 }
@@ -44,30 +84,12 @@ extension WorkoutCommon {
 		
 		let exercise = ExerciseType()
 		exercise.details = details
+		exercise.order = exercises.count
 		exercises.append(exercise)
 	}
 	
 	func removeExercise(_ exercise: ExerciseType) {
 		exercises.removeFirst { $0 == exercise }
-	}
-	
-	var orderedExercises: [ExerciseType] {
-		exercises.sorted(by: { $0.order < $1.order })
-	}
-	
-	var exercisesToRender: [ExerciseToRender<ExerciseType>] {
-		/// Groups into a dictionary, they key can be a UUID or nil if there's no supersetGroup
-		let groupedExercises = Dictionary(grouping: orderedExercises) { $0.supersetGroup?.id }
-		
-		/// Transform the groups into `ExerciseToRender` values
-		return groupedExercises.flatMap { key, group in
-			 if key == nil {
-				 /// Treat exercises with `nil` supersetGroup as singles
-				 return group.map { ExerciseToRender.single($0) }
-			 } else {
-				 return [.group(group)] // Group of exercises
-			 }
-		 }
 	}
 	
 	/// Maps all the visible textFields that can be cycled via WorkoutKeyboard "next".
@@ -85,7 +107,7 @@ extension WorkoutCommon {
 		
 		return results
 	}
-
+	
 	/// Generates input indexes for a given exercise category, updating the counter.
 	private func generateInputIndexes(for category: ExerciseCategory?, counter: inout Int) -> [Int] {
 		let inputsNeeded: Int

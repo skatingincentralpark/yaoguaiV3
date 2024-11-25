@@ -29,7 +29,7 @@ struct SetTemplate: SetCommon {
 	var workout: WorkoutTemplate?
 	var sets: [SetTemplate] = []
 	var order: Int = 0
-	var supersetGroup: SupersetGroup?
+	var supersetGroup: SupersetGroupTemplate?
 	
 	init() {}
 }

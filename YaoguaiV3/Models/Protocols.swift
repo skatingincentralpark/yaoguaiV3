@@ -9,12 +9,6 @@ import Foundation
 import Observation
 import SwiftData
 
-struct SupersetGroup: Identifiable, Codable {
-	var id = UUID()
-	var endTimer: TimeInterval? // optionally, the timer that runs at the end of the group
-	var order: Int // This will take precedence over the individual exercise's order
-}
-
 protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	associatedtype ExerciseType: ExerciseCommon
 	
@@ -26,45 +20,6 @@ protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	
 	func addExercise(details: Exercise)
 	func removeExercise(_ exercise: ExerciseType)
-}
-
-struct OrderedExerciseToRender<T: ExerciseCommon>: Reorderable, Comparable {
-	let exerciseToRender: ExerciseToRender<T>
-	
-	var id: PersistentIdentifier {
-		switch self.exerciseToRender {
-		case .group(let exercises):
-			return exercises.first!.persistentModelID
-		case .single(let exercise):
-			return exercise.persistentModelID
-		}
-	}
-	
-	var order: Int {
-		switch self.exerciseToRender {
-		case .group(let exercises):
-			return exercises.first?.supersetGroup?.order ?? 0
-		case .single(let exercise):
-			return exercise.order
-		}
-	}
-	
-	init(exerciseToRender: ExerciseToRender<T>) {
-		self.exerciseToRender = exerciseToRender
-	}
-	
-	static func == (lhs: OrderedExerciseToRender<T>, rhs: OrderedExerciseToRender<T>) -> Bool {
-		return lhs.exerciseToRender == rhs.exerciseToRender
-	}
-	
-	static func < (lhs: OrderedExerciseToRender<T>, rhs: OrderedExerciseToRender<T>) -> Bool {
-		return lhs.order < rhs.order
-	}
-}
-
-enum ExerciseToRender<T: ExerciseCommon>: Equatable {
-	case single(T)
-	case group([T])
 }
 
 extension WorkoutCommon {
@@ -131,6 +86,24 @@ extension WorkoutCommon {
 		
 		return inputIndexes
 	}
+	
+	func updateOrderOfExercises() {
+		// Sort children based on their Comparable conformance
+		let sortedChildren = self.exercises.sorted()
+		
+		// Update each child's order to match its new position
+		for (index, child) in sortedChildren.enumerated() {
+			child.order = index
+		}
+		
+		// Update group orders based on the order of their first child
+		let groups = Set(self.exercises.compactMap { $0.supersetGroup })
+		for group in groups {
+			if let firstChild = group.exercises.sorted().first {
+				group.order = firstChild.order
+			}
+		}
+	}
 }
 
 
@@ -157,16 +130,17 @@ enum ExerciseCategory: String, Codable, CaseIterable {
 	}
 }
 
-protocol ExerciseCommon: Observable, AnyObject, Identifiable, PersistentModel {
+protocol ExerciseCommon: Observable, AnyObject, Identifiable, PersistentModel, Comparable {
 	associatedtype WorkoutType: WorkoutCommon
 	associatedtype SetType: SetCommon
+	associatedtype SupersetGroupType: SupersetGroupCommon
 	
 	var created: Date { get set }
 	var details: Exercise? { get set }
 	var workout: (WorkoutType)? { get set }
 	var sets: [SetType] { get set }
 	var order: Int { get set }
-	var supersetGroup: SupersetGroup? { get set }
+	var supersetGroup: SupersetGroupType? { get set }
 	
 	func addSet()
 	func removeSet(_ set: SetType)
@@ -195,6 +169,44 @@ extension ExerciseCommon {
 			updatedSet.category = newDetails.category
 			return updatedSet
 		}
+	}
+	
+	// Compare children, considering their group order first, then individual order.
+	static func < (lhs: Self, rhs: Self) -> Bool {
+		// Compare by group order if both are in groups
+		if let lhsGroup = lhs.supersetGroup, let rhsGroup = rhs.supersetGroup {
+			if lhsGroup.order != rhsGroup.order {
+				return lhsGroup.order < rhsGroup.order
+			} else {
+				return lhs.order < rhs.order
+			}
+		} else if let lhsGroup = lhs.supersetGroup {
+			// LHS is in a group, RHS is not
+			return lhsGroup.order < rhs.order
+		} else if let rhsGroup = rhs.supersetGroup {
+			// RHS is in a group, LHS is not
+			return lhs.order < rhsGroup.order
+		}
+		
+		// Fallback to comparing individual orders
+		return lhs.order < rhs.order
+	}
+	
+	func addToNewGroup(with target: Self) {
+		guard target.supersetGroup == nil else { return }
+		let newGroup = SupersetGroupType(order: target.order)
+		self.supersetGroup = newGroup
+		self.order = target.order + 1
+		target.supersetGroup = newGroup
+		self.workout?.updateOrderOfExercises()
+	}
+	
+	func addToGroup(_ group: SupersetGroupType) {
+		print("Adding \(self.id.hashValue) to group.  It's new order is \(group.exercises.count + 1).")
+		guard let lastChild = group.exercises.sorted().last else { return }
+		self.supersetGroup = group
+		self.order = lastChild.order + 1
+		self.workout?.updateOrderOfExercises()
 	}
 }
 

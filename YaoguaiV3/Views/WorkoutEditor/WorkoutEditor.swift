@@ -12,7 +12,7 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 	@Bindable var workout: T
 	let modelContext: ModelContext
 	@State private var exerciseListSheetShown = false
-	@State private var currentlyDragged: OrderedExerciseToRender<T.ExerciseType>?
+	@State private var currentlyDragged: SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>?
 	
 	init(
 		workout: T,
@@ -56,29 +56,19 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 	struct ExerciseList: View {
 		@Bindable var workout: T
 		let modelContext: ModelContext
-		@Binding var currentlyDragged: OrderedExerciseToRender<T.ExerciseType>?
-		@State var renderedExercises: [OrderedExerciseToRender<T.ExerciseType>] = []
+		@Binding var currentlyDragged: SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>?
+		@State var renderedExercises: [SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>] = []
+		@State var exerciseToAddToSupersetGroup: T.ExerciseType?
 		
 		init(
 			workout: T,
 			modelContext: ModelContext,
-			currentlyDragged: Binding<OrderedExerciseToRender<T.ExerciseType>?>
+			currentlyDragged: Binding<SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>?>
 		) {
 			self.workout = workout
 			self.modelContext = modelContext
 			self._currentlyDragged = currentlyDragged
-			
-			let grouped = Dictionary(grouping: workout.exercises) { $0.supersetGroup?.id }
-			let renderedExercises: [OrderedExerciseToRender<T.ExerciseType>] = grouped.flatMap { key, group in
-				if key == nil {
-					return group.map { item in
-						return OrderedExerciseToRender(exerciseToRender: .single(item))
-					}
-				} else {
-					return [OrderedExerciseToRender(exerciseToRender: .group(group))]
-				}
-			}.sorted()
-			self._renderedExercises = .init(wrappedValue: renderedExercises)
+			self._renderedExercises = .init(wrappedValue: workout.exercises.makeItemsToRender())
 		}
 		
 		var body: some View {
@@ -103,14 +93,14 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 					
 					Text("ActualOrder Order: \(renderedExercise.order)")
 						.font(.subheadline.bold())
-					switch renderedExercise.exerciseToRender {
+					switch renderedExercise {
 					case .single(let exercise):
 						Text("\(exercise.details?.name ?? "") (Order: \(exercise.order))")
 							.fontWeight(.heavy)
-					case .group(let exercises):
-						Text("SupersetGroupOrder: \(exercises.first?.supersetGroup?.order)")
+					case .group(let group):
+						Text("SupersetGroupOrder: \(group.exercises.first?.supersetGroup?.order)")
 							.font(.subheadline.bold())
-						ForEach(exercises) { exercise in
+						ForEach(group.exercises) { exercise in
 							Text("\(exercise.details?.name ?? "") (Order: \(exercise.order))")
 								.fontWeight(.heavy)
 						}
@@ -128,28 +118,30 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 		func moveAction(_ indices: IndexSet, _ newOffset: Int) {
 			var s = renderedExercises
 			s.move(fromOffsets: indices, toOffset: newOffset)
-			var counter = 0 // this counter is used to get the correct order for exercises in supersets
 			
-			s.enumerated().forEach { index, orderedExerciseToRender in
-				switch orderedExerciseToRender.exerciseToRender {
-				case .single(let exercise):
-					exercise.order = counter
-					counter += 1
-				case .group(let exercises):
-					exercises.enumerated().forEach { subIndex, exercise in
-						exercise.order = counter
-						exercise.supersetGroup?.order = counter
-						counter += 1
+			var count = 0
+			
+			s.forEach { item in
+				switch item {
+				case .single(let child):
+					child.order = count
+					count += 1
+				case .group(let group):
+					group.order = count
+					group.exercises.forEach { exercise in
+						exercise.order = count
+						count += 1
 					}
 				}
 			}
 			
-			withAnimation(.bouncy(duration: 0.4)) {
+			withAnimation {
 				renderedExercises = s
 			}
 		}
 	}
 }
+
 
 #Preview(traits: .sizeThatFitsLayout) {
 	do {
@@ -165,3 +157,4 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 		return Text("Failed to build preview")
 	}
 }
+

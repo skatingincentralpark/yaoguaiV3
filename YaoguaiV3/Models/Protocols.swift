@@ -10,7 +10,7 @@ import Observation
 import SwiftData
 
 protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
-	associatedtype ExerciseType: ExerciseCommon
+	associatedtype ExerciseType: ExerciseCommon where ExerciseType.SupersetGroupType.ExerciseType == ExerciseType
 	
 	var name: String { get set }
 	var created: Date { get set }
@@ -177,9 +177,10 @@ extension ExerciseCommon {
 		if let lhsGroup = lhs.supersetGroup, let rhsGroup = rhs.supersetGroup {
 			if lhsGroup.order != rhsGroup.order {
 				return lhsGroup.order < rhsGroup.order
-			} else {
-				return lhs.order < rhs.order
 			}
+			
+			return lhs.order < rhs.order
+			
 		} else if let lhsGroup = lhs.supersetGroup {
 			// LHS is in a group, RHS is not
 			return lhsGroup.order < rhs.order
@@ -202,7 +203,6 @@ extension ExerciseCommon {
 	}
 	
 	func addToGroup(_ group: SupersetGroupType) {
-		print("Adding \(self.id.hashValue) to group.  It's new order is \(group.exercises.count + 1).")
 		guard let lastChild = group.exercises.sorted().last else { return }
 		self.supersetGroup = group
 		self.order = lastChild.order + 1

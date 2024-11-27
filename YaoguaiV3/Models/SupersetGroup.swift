@@ -23,7 +23,7 @@ extension SupersetGroupCommon {
 	}
 }
 
-enum SingleOrGroup<T: ExerciseCommon, U: SupersetGroupCommon>: Comparable, Identifiable {
+enum SingleOrGroup<T: ExerciseCommon, U: SupersetGroupCommon>: Comparable, Identifiable where U.ExerciseType == T {
 	case single(T)
 	case group(U)
 	
@@ -50,7 +50,7 @@ enum SingleOrGroup<T: ExerciseCommon, U: SupersetGroupCommon>: Comparable, Ident
 	}
 }
 
-extension Array where Element: ExerciseCommon {
+extension Array where Element: ExerciseCommon, Element.SupersetGroupType.ExerciseType == Element {
 	func makeItemsToRender() -> [SingleOrGroup<Element, Element.SupersetGroupType>] {
 		self.reduce(into: [SingleOrGroup<Element, Element.SupersetGroupType>]()) { result, child in
 			if let group = child.supersetGroup {

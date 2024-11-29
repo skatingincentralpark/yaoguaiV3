@@ -58,7 +58,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 					
 					if exercise.supersetGroup != nil {
 						Button("Remove From Superset") {
-							exercise.removeFromSuperset(using: modelContext)
+							exercise.removeFromGroup(using: modelContext)
 							renderExercises()
 						}
 					}

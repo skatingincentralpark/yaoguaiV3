@@ -145,6 +145,9 @@ protocol ExerciseCommon: Observable, AnyObject, Identifiable, PersistentModel, C
 	func addSet()
 	func removeSet(_ set: SetType)
 	func replaceDetails(newDetails: Exercise)
+	func addToNewGroup(with target: Self)
+	func addToExistingGroup(_ group: SupersetGroupType)
+	func removeFromGroup(using modelContext: ModelContext)
 	
 	init()
 }
@@ -202,14 +205,14 @@ extension ExerciseCommon {
 		self.workout?.updateOrderOfExercises()
 	}
 	
-	func addToGroup(_ group: SupersetGroupType) {
+	func addToExistingGroup(_ group: SupersetGroupType) {
 		guard let lastChild = group.exercises.sorted().last else { return }
 		self.supersetGroup = group
 		self.order = lastChild.order + 1
 		self.workout?.updateOrderOfExercises()
 	}
 	
-	func removeFromSuperset(using modelContext: ModelContext) {
+	func removeFromGroup(using modelContext: ModelContext) {
 		 guard let supersetGroup = self.supersetGroup else { return }
 		 
 		 if supersetGroup.exercises.count == 2 {

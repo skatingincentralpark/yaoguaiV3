@@ -191,7 +191,7 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 						}
 					case .group(let group):
 						Button {
-							exercise.addToGroup(group)
+							exercise.addToExistingGroup(group)
 							withAnimation {
 								generateItemsToRender()
 							}

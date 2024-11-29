@@ -184,7 +184,7 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	}
 }
 
-struct AddGroupSheetView<T: ExerciseCommon>: View where T == T.SupersetGroupType.ExerciseType {
+struct AddGroupSheetView<T: ExerciseCommon>: View {
 	@Environment(\.dismiss) var dismiss
 	var exercise: T
 	var itemsToRender: [SingleOrGroup<T, T.SupersetGroupType>]

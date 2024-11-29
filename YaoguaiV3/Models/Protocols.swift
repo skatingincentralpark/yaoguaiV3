@@ -133,7 +133,7 @@ enum ExerciseCategory: String, Codable, CaseIterable {
 protocol ExerciseCommon: Observable, AnyObject, Identifiable, PersistentModel, Comparable {
 	associatedtype WorkoutType: WorkoutCommon
 	associatedtype SetType: SetCommon
-	associatedtype SupersetGroupType: SupersetGroupCommon
+	associatedtype SupersetGroupType: SupersetGroupCommon where SupersetGroupType.ExerciseType == Self
 	
 	var created: Date { get set }
 	var details: Exercise? { get set }

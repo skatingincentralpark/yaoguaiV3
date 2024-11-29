@@ -71,6 +71,8 @@ extension Array where Element: ExerciseCommon, Element.SupersetGroupType.Exercis
 }
 
 @Model class SupersetGroupRecord: SupersetGroupCommon {
+	typealias ExerciseType = ExerciseRecord
+
 	var order: Int
 	@Relationship(deleteRule: .nullify, inverse: \ExerciseRecord.supersetGroup) var exercises: [ExerciseRecord] = []
 	
@@ -80,6 +82,8 @@ extension Array where Element: ExerciseCommon, Element.SupersetGroupType.Exercis
 }
 
 @Model class SupersetGroupTemplate: SupersetGroupCommon {
+	typealias ExerciseType = ExerciseTemplate
+	
 	var order: Int
 	@Relationship(deleteRule: .nullify, inverse: \ExerciseTemplate.supersetGroup) var exercises: [ExerciseTemplate] = []
 	

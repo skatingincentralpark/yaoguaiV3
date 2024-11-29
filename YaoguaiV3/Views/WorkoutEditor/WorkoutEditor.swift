@@ -82,71 +82,32 @@ struct ExerciseList<T: WorkoutCommon>: View {
 			renderedExercises,
 			active: $currentlyDragged
 		) { renderedExercise in
-			//				ExerciseEditor(
-			//					exercise: exercise,
-			//					delete: {
-			//						workout.removeExercise(exercise)
-			//						modelContext.delete(exercise)
-			//					},
-			//					modelContext: modelContext
-			//				)
-			
 			VStack(alignment: .leading) {
-				Text("\(renderedExercise.id.hashValue)").lineLimit(1)
-					.font(.caption)
-					.opacity(0.6)
-					.padding(.bottom, 5)
-				
-				Text("Order: \(renderedExercise.order)")
-					.font(.subheadline.bold())
-				
 				switch renderedExercise {
 				case .single(let exercise):
-					HStack {
-						Text("\(exercise.details?.name ?? "") (Order: \(exercise.order))")
-							.fontWeight(.heavy)
-							.lineLimit(0)
-						Spacer()
-						Button("Add To Group") {
-							exerciseToAddToSupersetGroup = exercise
-						}
-						Button(role: .destructive) {
-							workout.exercises.removeFirst(where: { $0 == exercise })
-							modelContext.delete(exercise)
-							renderedExercises = workout.exercises.makeItemsToRender()
-						} label: {
-							Image(systemName: "xmark")
-						}
-
+					VStack(alignment: .leading, spacing: 10) {
+						ExerciseEditor(
+							workout: workout,
+							exercise: exercise,
+							exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
+							renderExercises: {
+								renderedExercises = workout.exercises.makeItemsToRender()
+							},
+							modelContext: modelContext
+						)
 					}
 				case .group(let group):
-					ForEach(group.exercises.sorted()) { exercise in
-						HStack {
-							Text("\(exercise.details?.name ?? "") (Order: \(exercise.order))")
-								.fontWeight(.heavy)
-								.lineLimit(0)
-							Spacer()
-							
-							Menu {
-								Button("Add To Group") {
-									exerciseToAddToSupersetGroup = exercise
-								}
-								
-								Button("Delete") {
-									workout.exercises.removeFirst(where: { $0 == exercise })
-									modelContext.delete(exercise)
+					VStack(alignment: .leading, spacing: 10) {
+						ForEach(group.exercises.sorted()) { exercise in
+							ExerciseEditor(
+								workout: workout,
+								exercise: exercise,
+								exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
+								renderExercises: {
 									renderedExercises = workout.exercises.makeItemsToRender()
-								}
-								
-								Button("Remove from superset") {
-									exercise.removeFromSuperset(using: modelContext)
-									renderedExercises = workout.exercises.makeItemsToRender()
-								}
-								
-							} label: {
-								Image(systemName: "ellipsis")
-							}
-							.buttonStyle(.bordered)
+								},
+								modelContext: modelContext
+							)
 						}
 					}
 				}
@@ -207,14 +168,12 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 	}
 	
 	var body: some View {
-		VStack {
-			Text("\(exercise.details?.name)")
-				.font(.headline)
+		VStack(alignment: .leading) {
+			Text("Add \(exercise.details?.name ?? "") to:")
+				.font(.title3.bold())
 			
 			ForEach(filteredItemsToRender) { renderedExercise in
 				VStack(alignment: .leading) {
-					Text("SingleOrGroupOrder: \(renderedExercise.order)")
-					
 					switch renderedExercise {
 					case .single(let targetExercise):
 						HStack {
@@ -225,8 +184,7 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 								}
 								dismiss()
 							} label: {
-								Text("\(targetExercise.details?.name ?? "") (Order: \(targetExercise.order))")
-									.fontWeight(.heavy)
+								Text("\(targetExercise.details?.name ?? "")")
 									.lineLimit(0)
 							}
 							
@@ -241,8 +199,7 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 						} label: {
 							VStack(alignment: .leading) {
 								ForEach(group.exercises.sorted()) { exercise in
-									Text("\(exercise.details?.name ?? "") (Order: \(exercise.order))")
-										.fontWeight(.heavy)
+									Text("\(exercise.details?.name ?? "")")
 										.lineLimit(0)
 								}
 							}

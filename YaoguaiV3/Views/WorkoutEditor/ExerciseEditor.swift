@@ -8,20 +8,26 @@
 import SwiftUI
 import SwiftData
 
-struct ExerciseEditor<T: ExerciseCommon>: View {
-	@Bindable var exercise: T
+struct ExerciseEditor<T: WorkoutCommon>: View {
+	var workout: T
+	@Bindable var exercise: T.ExerciseType
+	@Binding var exerciseToAddToSupersetGroup: T.ExerciseType?
 	let modelContext: ModelContext
-	var delete: () -> Void
+	var renderExercises: () -> Void
 	
 	@State private var replaceExerciseSheetPresented = false
 	
 	init(
-		exercise: T,
-		delete: @escaping () -> Void,
+		workout: T,
+		exercise: T.ExerciseType,
+		exerciseToAddToSupersetGroup: Binding<T.ExerciseType?>,
+		renderExercises: @escaping () -> Void,
 		modelContext: ModelContext
 	) {
+		self.workout = workout
 		self.exercise = exercise
-		self.delete = delete
+		self._exerciseToAddToSupersetGroup = exerciseToAddToSupersetGroup
+		self.renderExercises = renderExercises
 		self.modelContext = modelContext
 	}
 	
@@ -29,6 +35,7 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 		VStack(alignment: .leading) {
 			HStack {
 				Text(exercise.details?.name ?? "")
+					.font(.title3.bold())
 				Spacer()
 				
 				Button {
@@ -37,23 +44,36 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 					Image(systemName: "plus.circle.fill")
 						.aspectRatio(1, contentMode: .fit)
 				}
-
 				
 				Menu {
-					Button(action: {
+					Button {
 						replaceExerciseSheetPresented = true
-					}) {
+					} label: {
 						Text("Replace")
-						Text("Retain sets but switch the exercise.")
 					}
 					
-					Button(role: .destructive, action: delete) {
-						Text("Remove")
-						Text("Remove this exercise from this workout.")
+					Button("Add To Group") {
+						exerciseToAddToSupersetGroup = exercise
+					}
+					
+					if exercise.supersetGroup != nil {
+						Button("Remove From Superset") {
+							exercise.removeFromSuperset(using: modelContext)
+							renderExercises()
+						}
+					}
+					
+					Button(role: .destructive) {
+						workout.removeExercise(exercise)
+						modelContext.delete(exercise)
+						renderExercises()
+					} label: {
+						Text("Remove From Workout")
 					}
 				} label: {
 					Image(systemName: "ellipsis")
 				}
+				.buttonStyle(.bordered)
 			}
 			
 			if exercise.sets.count > 0 {
@@ -79,9 +99,6 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 				.padding(.leading)
 			}
 		}
-		.padding()
-		.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
-		.clipShape(RoundedRectangle(cornerRadius: 8))
 		.sheet(isPresented: $replaceExerciseSheetPresented) {
 			ExerciseDetailsList(
 				onSelect: {
@@ -95,17 +112,17 @@ struct ExerciseEditor<T: ExerciseCommon>: View {
 	}
 }
 
-#Preview(traits: .sizeThatFitsLayout) {
-	do {
-		let (container, _) = try setupPreview()
-		
-		let workout = getWorkoutRecord(container.mainContext)
-		
-		container.mainContext.insert(workout)
-		
-		return ExerciseEditor(exercise: workout.exercises[0], delete: {}, modelContext: container.mainContext)
-			.modelContainer(container)
-	}  catch {
-		return Text("Failed to build preview")
-	}
-}
+//#Preview(traits: .sizeThatFitsLayout) {
+//	do {
+//		let (container, _) = try setupPreview()
+//		
+//		let workout = getWorkoutRecord(container.mainContext)
+//		
+//		container.mainContext.insert(workout)
+//		
+//		return ExerciseEditor(exercise: workout.exercises[0], delete: {}, modelContext: container.mainContext)
+//			.modelContainer(container)
+//	}  catch {
+//		return Text("Failed to build preview")
+//	}
+//}

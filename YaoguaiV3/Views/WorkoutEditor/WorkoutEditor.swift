@@ -126,16 +126,27 @@ struct ExerciseList<T: WorkoutCommon>: View {
 								.fontWeight(.heavy)
 								.lineLimit(0)
 							Spacer()
-							Button("Add To Group") {
-								exerciseToAddToSupersetGroup = exercise
-							}
-							Button(role: .destructive) {
-								workout.exercises.removeFirst(where: { $0 == exercise })
-								modelContext.delete(exercise)
-								renderedExercises = workout.exercises.makeItemsToRender()
+							
+							Menu {
+								Button("Add To Group") {
+									exerciseToAddToSupersetGroup = exercise
+								}
+								
+								Button("Delete") {
+									workout.exercises.removeFirst(where: { $0 == exercise })
+									modelContext.delete(exercise)
+									renderedExercises = workout.exercises.makeItemsToRender()
+								}
+								
+								Button("Remove from superset") {
+									exercise.removeFromSuperset(using: modelContext)
+									renderedExercises = workout.exercises.makeItemsToRender()
+								}
+								
 							} label: {
-								Image(systemName: "xmark")
+								Image(systemName: "ellipsis")
 							}
+							.buttonStyle(.bordered)
 						}
 					}
 				}

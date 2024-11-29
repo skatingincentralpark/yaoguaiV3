@@ -208,6 +208,20 @@ extension ExerciseCommon {
 		self.order = lastChild.order + 1
 		self.workout?.updateOrderOfExercises()
 	}
+	
+	func removeFromSuperset(using modelContext: ModelContext) {
+		 guard let supersetGroup = self.supersetGroup else { return }
+		 
+		 if supersetGroup.exercises.count == 2 {
+			 // If there are only two exercises, clearing the group and deleting it
+			 supersetGroup.exercises = []
+			 modelContext.delete(supersetGroup)
+		 } else {
+			 // Otherwise, detach the exercise from the group
+			 self.supersetGroup = nil
+			 self.order = supersetGroup.order + 1
+		 }
+	 }
 }
 
 protocol SetCommon: Identifiable, Codable, Equatable {

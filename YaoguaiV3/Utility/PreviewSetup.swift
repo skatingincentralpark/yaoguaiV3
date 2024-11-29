@@ -36,11 +36,6 @@ func getWorkoutRecord(_ context: ModelContext) -> WorkoutRecord {
 	record1.addExercise(details: pushups)
 	record1.addExercise(details: militaryPress)
 	record1.addExercise(details: farmersCarries)
-	record1.exercises.first?.addSet()
-	
-	let supersetGroup = SupersetGroup(order: 0)
-	record1.exercises[2].supersetGroup = supersetGroup
-	record1.exercises[3].supersetGroup = supersetGroup
 	
 	return record1
 }

@@ -52,23 +52,23 @@ enum SingleOrGroup<T: ExerciseCommon, U: SupersetGroupCommon>: Comparable, Ident
 
 extension Array where Element: ExerciseCommon, Element.SupersetGroupType.ExerciseType == Element {
 	func makeItemsToRender() -> [SingleOrGroup<Element, Element.SupersetGroupType>] {
-		self.reduce(into: [SingleOrGroup<Element, Element.SupersetGroupType>]()) { result, child in
+		var seenGroups = Set<Element.SupersetGroupType>() // Track seen superset groups
+		var itemsToRender: [SingleOrGroup<Element, Element.SupersetGroupType>] = []
+
+		for child in self {
 			if let group = child.supersetGroup {
-				if !result.contains(where: {
-					if case .group(let existingGroup) = $0 {
-						return existingGroup == group
-					}
-					return false
-				}) {
-					result.append(.group(group))
+				if seenGroups.insert(group).inserted { // Insert into the set, check if it's new
+					itemsToRender.append(.group(group))
 				}
 			} else {
-				result.append(.single(child))
+				itemsToRender.append(.single(child))
 			}
 		}
-		.sorted() // Ensure final order by the `order` property
+		
+		return itemsToRender.sorted() // Ensure final order by the `order` property
 	}
 }
+
 
 @Model class SupersetGroupRecord: SupersetGroupCommon {
 	typealias ExerciseType = ExerciseRecord

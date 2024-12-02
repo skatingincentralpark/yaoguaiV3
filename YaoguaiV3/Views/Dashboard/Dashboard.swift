@@ -47,7 +47,15 @@ struct Dashboard: View {
 				Section("Development Helpers") {
 					Button("Add Dummy Exercise Details", action: addDummyExercises)
 					Button("Delete Exercise Records", role: .destructive, action: {
-						try? modelContext.delete(model: ExerciseRecord.self)
+						do {
+							let fetchRequest = FetchDescriptor<ExerciseRecord>()
+							let records = try modelContext.fetch(fetchRequest) // Fetch all ExerciseRecord entities
+							for record in records {
+								modelContext.delete(record) // Delete each record
+							}
+						} catch {
+							print("Failed to delete exercise records: \(error)")
+						}
 					})
 					Button("Delete Exercise Details", role: .destructive) {
 						try? modelContext.delete(model: Exercise.self)

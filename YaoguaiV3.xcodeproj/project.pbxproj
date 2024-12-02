@@ -31,6 +31,7 @@
 		A1802C3B2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1802C3A2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift */; };
 		A1802C462C829DB500272B66 /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1802C452C829DB500272B66 /* Collection.swift */; };
 		A19739352C4B2D6500356010 /* Array.swift in Sources */ = {isa = PBXBuildFile; fileRef = A19739342C4B2D6500356010 /* Array.swift */; };
+		A1AC67952CF9A59200197140 /* ReorderingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1AC67942CF9A59200197140 /* ReorderingTests.swift */; };
 		A1B555A62CD8DA9E00D48B9E /* ReorderableForEach.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B555A52CD8DA9E00D48B9E /* ReorderableForEach.swift */; };
 		A1B728842CF46E290022EA42 /* SupersetGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1B728832CF46E290022EA42 /* SupersetGroup.swift */; };
 		A1C5E74C2CA0235300C9B902 /* UnitMassTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E74B2CA0235300C9B902 /* UnitMassTextField.swift */; };
@@ -80,6 +81,7 @@
 		A1802C3A2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CurrentWorkoutManagerTests.swift; sourceTree = "<group>"; };
 		A1802C452C829DB500272B66 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		A19739342C4B2D6500356010 /* Array.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Array.swift; sourceTree = "<group>"; };
+		A1AC67942CF9A59200197140 /* ReorderingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReorderingTests.swift; sourceTree = "<group>"; };
 		A1B555A52CD8DA9E00D48B9E /* ReorderableForEach.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReorderableForEach.swift; sourceTree = "<group>"; };
 		A1B728832CF46E290022EA42 /* SupersetGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupersetGroup.swift; sourceTree = "<group>"; };
 		A1C5E74B2CA0235300C9B902 /* UnitMassTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnitMassTextField.swift; sourceTree = "<group>"; };
@@ -214,6 +216,7 @@
 			children = (
 				A1802C3A2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift */,
 				A15AEC8D2CB53D6C00866739 /* WorkoutTemplateTests.swift */,
+				A1AC67942CF9A59200197140 /* ReorderingTests.swift */,
 			);
 			path = YaoguaiV3Tests;
 			sourceTree = "<group>";
@@ -402,6 +405,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A1802C3B2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift in Sources */,
+				A1AC67952CF9A59200197140 /* ReorderingTests.swift in Sources */,
 				A15AEC8E2CB53D6C00866739 /* WorkoutTemplateTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

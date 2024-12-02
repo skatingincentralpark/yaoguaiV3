@@ -198,6 +198,7 @@ extension ExerciseCommon {
 	
 	func addToNewGroup(with target: Self) {
 		guard target.supersetGroup == nil else { return }
+		guard self != target else { return }
 		let newGroup = SupersetGroupType(order: target.order)
 		self.supersetGroup = newGroup
 		self.order = target.order + 1
@@ -222,7 +223,8 @@ extension ExerciseCommon {
 		 } else {
 			 // Otherwise, detach the exercise from the group
 			 self.supersetGroup = nil
-			 self.order = supersetGroup.order + 1
+			 self.order = supersetGroup.order + supersetGroup.exercises.count
+			 self.workout?.updateOrderOfExercises()
 		 }
 	 }
 }

@@ -35,7 +35,8 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 		VStack(alignment: .leading) {
 			HStack {
 				Text(exercise.details?.name ?? "")
-					.font(.title3.bold())
+					.bold()
+					.padding(.bottom, 10)
 				Spacer()
 				
 				Button {
@@ -88,15 +89,9 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 									exercise.removeSet(set.wrappedValue)
 								}
 							)
-							.padding(.leading)
 						}
 					}
-					.overlay(alignment: .leading) {
-						Rectangle()
-							.frame(width: 1)
-					}
 				}
-				.padding(.leading)
 			}
 		}
 		.sheet(isPresented: $replaceExerciseSheetPresented) {
@@ -112,17 +107,23 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 	}
 }
 
-//#Preview(traits: .sizeThatFitsLayout) {
-//	do {
-//		let (container, _) = try setupPreview()
-//		
-//		let workout = getWorkoutRecord(container.mainContext)
-//		
-//		container.mainContext.insert(workout)
-//		
-//		return ExerciseEditor(exercise: workout.exercises[0], delete: {}, modelContext: container.mainContext)
-//			.modelContainer(container)
-//	}  catch {
-//		return Text("Failed to build preview")
-//	}
-//}
+#Preview(traits: .sizeThatFitsLayout) {
+	do {
+		let (container, _) = try setupPreview()
+		let workout = getWorkoutRecord(container.mainContext)
+		container.mainContext.insert(workout)
+		
+		return ExerciseEditor(
+			workout: workout,
+			exercise: workout.exercises[0],
+			exerciseToAddToSupersetGroup: .constant(nil),
+			renderExercises: {},
+			modelContext: container.mainContext
+		)
+		.modelContainer(container)
+		.padding()
+	}  catch {
+		return Text("Failed to build preview")
+	}
+}
+

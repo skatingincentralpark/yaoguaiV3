@@ -171,7 +171,7 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 		VStack(alignment: .leading) {
 			Text("Add \(exercise.details?.name ?? "") to:")
 				.font(.title3.bold())
-			
+				
 			ForEach(filteredItemsToRender) { renderedExercise in
 				VStack(alignment: .leading) {
 					switch renderedExercise {

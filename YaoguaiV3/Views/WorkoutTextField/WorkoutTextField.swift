@@ -41,7 +41,7 @@ struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 		.clipShape(RoundedRectangle(cornerRadius: 6))
 		.overlay {
 			RoundedRectangle(cornerRadius: 6)
-				.stroke(focused ? .green : .gray, lineWidth: 2.0)
+				.stroke(focused ? .green : .clear, lineWidth: 2.0)
 		}
 	}
 }

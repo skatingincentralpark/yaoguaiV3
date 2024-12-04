@@ -37,5 +37,10 @@ func getWorkoutRecord(_ context: ModelContext) -> WorkoutRecord {
 	record1.addExercise(details: militaryPress)
 	record1.addExercise(details: farmersCarries)
 	
+	record1.exercises[0].addSet()
+	record1.exercises[1].addSet()
+	record1.exercises[2].addSet()
+	record1.exercises[3].addSet()
+	
 	return record1
 }

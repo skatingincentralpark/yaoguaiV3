@@ -39,62 +39,64 @@ struct SetEditor<T: SetCommon>: View {
 			}, label: {
 				if let previousSet {
 					Text("\(previousSet.valueString) kg x \(previousSet.repsString)")
-						.fixedSize()
+						.font(.footnote)
+						.monospaced()
 				} else {
 					Text("No Previous Set ")
-						.fixedSize()
+						.font(.footnote)
+						.disabled(true)
 				}
 			})
 			
-			VStack(alignment: .leading, spacing: 5) {
+			HStack {
 				Group {
 					switch set.category {
 					case .weightAndReps:
-						HStack {
+						VStack {
+//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 							UnitMassTextField(value: $set.value)
-							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 						}
-						HStack {
+						VStack {
+//							Text("\(set.repsString) reps")
 							SimpleTextFieldV2(value: $set.reps)
-							Text("\(set.repsString) reps")
 						}
-						HStack {
+						VStack {
+//							Text("\(set.rpeString) rpe")
 							SimpleTextFieldV2(value: $set.rpe)
-							Text("\(set.rpeString) rpe")
 						}
 					case .distanceAndWeight:
-						HStack {
+						VStack {
+//							Text(set.distanceString)
 							UnitLengthTextField(value: $set.distance)
-							Text(set.distanceString)
 						}
-						HStack {
+						VStack {
+//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 							UnitMassTextField(value: $set.value)
-							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 						}
 					case .duration:
-						HStack {
+						VStack {
+//							Text(set.durationString)
 							TimeIntervalPicker(timeInterval: $set.duration)
-							Text(set.durationString)
 						}
 					case .durationAndWeight:
-						HStack {
+						VStack {
+//							Text(set.durationString)
 							TimeIntervalPicker(timeInterval: $set.duration)
-							Text(set.durationString)
 						}
-						HStack {
+						VStack {
+//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 							UnitMassTextField(value: $set.value)
-							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
 						}
 					case .reps:
-						HStack {
+						VStack {
+//							Text("\(set.repsString) reps")
 							SimpleTextFieldV2(value: $set.reps)
-							Text("\(set.repsString) reps")
 						}
 					}
 				}
-			}
-			
-			HStack {
+				
+				Spacer()
+				
 				Button(role: .destructive) {
 					delete(set)
 				} label: {
@@ -149,8 +151,13 @@ struct CompleteToggleView: View {
 		
 		let exercise = workout.exercises[0]
 		
-		return SetEditor(set: .constant(exercise.sets[0]), exercise: exercise.details, index: 0, delete: {_ in })
-			.modelContainer(container)
+		return SetEditor(
+			set: .constant(exercise.sets[0]),
+			exercise: exercise.details,
+			index: 0,
+			delete: { _ in }
+		)
+		.modelContainer(container)
 	}  catch {
 		return Text("Failed to build preview")
 	}

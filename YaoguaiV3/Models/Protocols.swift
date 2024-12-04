@@ -220,4 +220,19 @@ extension SetCommon {
 		guard let distance = distance else { return "" }
 		return distance.formatted()
 	}
+	
+	func isValid(for category: ExerciseCategory) -> Bool {
+		switch category {
+		case .weightAndReps:
+			return value != nil && reps != nil
+		case .reps:
+			return reps != nil
+		case .duration:
+			return duration != nil
+		case .durationAndWeight:
+			return duration != nil && value != nil
+		case .distanceAndWeight:
+			return distance != nil && value != nil
+		}
+	}
 }

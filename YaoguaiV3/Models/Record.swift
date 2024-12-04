@@ -10,53 +10,23 @@ import SwiftData
 
 struct SetRecord: SetCommon {
 	var id = UUID()
+	private(set) var complete = false
 	
-	var value: Measurement<UnitMass>? {
-		didSet { toggleCompleteOffIfInvalid(value) }
-	}
-	var reps: Int? {
-		didSet { toggleCompleteOffIfInvalid(reps) }
-	}
-	var rpe: Double? {
-		didSet { toggleCompleteOffIfInvalid(rpe) }
-	}
-	var duration: TimeInterval? {
-		didSet { toggleCompleteOffIfInvalid(duration) }
-	}
-	var distance: Measurement<UnitLength>? {
-		didSet { toggleCompleteOffIfInvalid(distance) }
-	}
-	
-	private var _complete = false
-	
-	func isValid(for category: ExerciseCategory) -> Bool {
-		switch category {
-		case .weightAndReps:
-			return value != nil && reps != nil
-		case .reps:
-			return reps != nil
-		case .duration:
-			return duration != nil
-		case .durationAndWeight:
-			return duration != nil && value != nil
-		case .distanceAndWeight:
-			return distance != nil && value != nil
-		}
-	}
+	var value: Measurement<UnitMass>? { didSet { toggleCompleteOffIfInvalid(value) } }
+	var reps: Int? { didSet { toggleCompleteOffIfInvalid(reps) } }
+	var rpe: Double? { didSet { toggleCompleteOffIfInvalid(rpe) } }
+	var duration: TimeInterval? { didSet { toggleCompleteOffIfInvalid(duration) } }
+	var distance: Measurement<UnitLength>? { didSet { toggleCompleteOffIfInvalid(distance) } }
 	
 	mutating func toggleComplete(for category: ExerciseCategory) {
-		if isValid(for: category) {
-			complete.toggle()
-		} else {
+		guard isValid(for: category) else {
 			Task { @MainActor in
 				AlertManager.shared.addAlert("Didn't toggle complete because invalid", type: .warning)
 			}
+			return
 		}
-	}
-	
-	var complete: Bool {
-		get { _complete }
-		set { _complete = newValue }
+		
+		complete.toggle()
 	}
 	
 	init() {}
@@ -64,7 +34,7 @@ struct SetRecord: SetCommon {
 	// Generic function to check if a value is non-nil
 	private mutating func toggleCompleteOffIfInvalid<T>(_ field: T?) {
 		if field == nil {
-			_complete = false
+			complete = false
 		}
 	}
 }

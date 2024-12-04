@@ -9,7 +9,7 @@ import SwiftUI
 
 struct SetEditor<T: SetCommon>: View {
 	@Binding var set: T
-	let exercise: Exercise?
+	let exercise: Exercise
 	let index: Int
 	var previousSet: SetRecord?
 	
@@ -17,7 +17,7 @@ struct SetEditor<T: SetCommon>: View {
 	
 	init(
 		set: Binding<T>,
-		exercise: Exercise?,
+		exercise: Exercise,
 		index: Int,
 		delete: @escaping (T) -> Void
 	) {
@@ -25,7 +25,7 @@ struct SetEditor<T: SetCommon>: View {
 		self.exercise = exercise
 		self.index = index
 		self.delete = delete
-		self.previousSet = exercise?.latestRecord?.sets[safe: index]
+		self.previousSet = exercise.latestRecord?.sets[safe: index]
 	}
 	
 	var body: some View {
@@ -50,7 +50,7 @@ struct SetEditor<T: SetCommon>: View {
 			
 			HStack {
 				Group {
-					switch set.category {
+					switch exercise.category {
 					case .weightAndReps:
 						VStack {
 //							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
@@ -120,7 +120,7 @@ struct SetEditor<T: SetCommon>: View {
 		}, set: { _ in
 			// Here we manually update the set with the new value
 			var mutableSet = toggleableSet
-			mutableSet.toggleComplete()
+			mutableSet.toggleComplete(for: exercise.category)
 			set = mutableSet as! T // Cast back to T and assign to @Binding set
 		})
 	}
@@ -150,14 +150,18 @@ struct CompleteToggleView: View {
 		container.mainContext.insert(workout)
 		
 		let exercise = workout.exercises[0]
-		
-		return SetEditor(
-			set: .constant(exercise.sets[0]),
-			exercise: exercise.details,
-			index: 0,
-			delete: { _ in }
-		)
-		.modelContainer(container)
+			
+		if let details = exercise.details {
+			return SetEditor(
+				set: .constant(exercise.sets[0]),
+				exercise: details,
+				index: 0,
+				delete: { _ in }
+			)
+			.modelContainer(container)
+		} else {
+			return Text("No Details.")
+		}
 	}  catch {
 		return Text("Failed to build preview")
 	}

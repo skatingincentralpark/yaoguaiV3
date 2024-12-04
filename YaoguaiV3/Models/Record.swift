@@ -10,7 +10,6 @@ import SwiftData
 
 struct SetRecord: SetCommon {
 	var id = UUID()
-	var category: ExerciseCategory
 	
 	var value: Measurement<UnitMass>? {
 		didSet { toggleCompleteOffIfInvalid(value) }
@@ -30,7 +29,7 @@ struct SetRecord: SetCommon {
 	
 	private var _complete = false
 	
-	var isValid: Bool {
+	func isValid(for category: ExerciseCategory) -> Bool {
 		switch category {
 		case .weightAndReps:
 			return value != nil && reps != nil
@@ -45,8 +44,8 @@ struct SetRecord: SetCommon {
 		}
 	}
 	
-	mutating func toggleComplete() {
-		if isValid {
+	mutating func toggleComplete(for category: ExerciseCategory) {
+		if isValid(for: category) {
 			complete.toggle()
 		} else {
 			Task { @MainActor in
@@ -60,9 +59,7 @@ struct SetRecord: SetCommon {
 		set { _complete = newValue }
 	}
 	
-	init(category: ExerciseCategory) {
-		self.category = category
-	}
+	init() {}
 	
 	// Generic function to check if a value is non-nil
 	private mutating func toggleCompleteOffIfInvalid<T>(_ field: T?) {

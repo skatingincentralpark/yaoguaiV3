@@ -81,14 +81,16 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 				HStack {
 					VStack(alignment: .leading) {
 						ForEach(Array($exercise.sets.enumerated()), id: \.1.id) { index, set in
-							SetEditor(
-								set: set,
-								exercise: exercise.details,
-								index: index,
-								delete: { _ in
-									exercise.removeSet(set.wrappedValue)
-								}
-							)
+							if let details = exercise.details {
+								SetEditor(
+									set: set,
+									exercise: details,
+									index: index,
+									delete: { _ in
+										exercise.removeSet(set.wrappedValue)
+									}
+								)
+							}
 						}
 					}
 				}

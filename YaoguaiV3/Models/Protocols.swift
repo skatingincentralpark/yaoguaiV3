@@ -114,9 +114,7 @@ protocol ExerciseCommon: Observable, AnyObject, Identifiable, PersistentModel, C
 
 extension ExerciseCommon {
 	func addSet() {
-		if let category = details?.category {
-			sets.append(SetType(category: category))
-		}
+		sets.append(SetType())
 	}
 	
 	func removeSet(_ set: SetType) {
@@ -127,11 +125,6 @@ extension ExerciseCommon {
 	
 	func replaceDetails(newDetails: Exercise) {
 		self.details = newDetails
-		self.sets = self.sets.map { set in
-			var updatedSet = set
-			updatedSet.category = newDetails.category
-			return updatedSet
-		}
 	}
 	
 	// Compare children, considering their group order first, then individual order.
@@ -191,7 +184,6 @@ extension ExerciseCommon {
 
 protocol SetCommon: Identifiable, Codable, Equatable {
 	var id: UUID { get set }
-	var category: ExerciseCategory { get set }
 	
 	var value: Measurement<UnitMass>? { get set }
 	var reps: Int? { get set }
@@ -199,7 +191,7 @@ protocol SetCommon: Identifiable, Codable, Equatable {
 	var duration: TimeInterval? { get set }
 	var distance: Measurement<UnitLength>? { get set }
 	
-	init(category: ExerciseCategory)
+	init()
 }
 
 extension SetCommon {

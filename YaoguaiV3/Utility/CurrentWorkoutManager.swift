@@ -83,26 +83,26 @@ extension CurrentWorkoutManager {
 
 extension CurrentWorkoutManager {
 	public func cancel() {
-	if let currentWorkout {
-		try? modelContext.transaction {
-			modelContext.delete(currentWorkout)
-			
-			// Although these will be cascade deleted, it won't happen immediately, XCTest assertions fail
-			currentWorkout.exercises.forEach { record in
-				modelContext.delete(record)
+		if let currentWorkout {
+			try? modelContext.transaction {
+				modelContext.delete(currentWorkout)
+				
+				// Although these will be cascade deleted, it won't happen immediately, XCTest assertions fail
+				currentWorkout.exercises.forEach { record in
+					modelContext.delete(record)
+				}
 			}
 		}
+		
+		self.currentWorkoutId = nil
+		self.currentWorkout = nil
+		
+		do {
+			try FileManager.default.removeItem(at: savePath)
+		} catch {
+			alertManager.addAlert("Unable to delete saved workout file. \(error.localizedDescription)", type: .error)
+		}
 	}
-	
-	self.currentWorkoutId = nil
-	self.currentWorkout = nil
-	
-	do {
-		try FileManager.default.removeItem(at: savePath)
-	} catch {
-		alertManager.addAlert("Unable to delete saved workout file. \(error.localizedDescription)", type: .error)
-	}
-}
 	
 	public func complete() {
 		alertManager.addAlert("Completing workout", type: .info)
@@ -112,8 +112,8 @@ extension CurrentWorkoutManager {
 		/// Ensures complete is toggled on for all valid sets
 		currentExercises.enumerated().forEach({ idx, exercise in
 			currentWorkout.exercises[idx].sets.enumerated().forEach({ setIdx, setRecord in
-				if !setRecord.complete && setRecord.isValid {
-					currentExercises[idx].sets[setIdx].toggleComplete()
+				if !setRecord.complete, let category = exercise.details?.category, setRecord.isValid(for: category) {
+					currentExercises[idx].sets[setIdx].toggleComplete(for: category)
 				}
 			})
 		})
@@ -171,9 +171,7 @@ extension CurrentWorkoutManager {
 			template.exercises.forEach { exerciseTemplate in
 				if let details = exerciseTemplate.details {
 					workoutRecord.addExercise(details: details)
-					
-					let sets = exerciseTemplate.sets.map { SetRecord(category: $0.category) }
-					
+					let sets = exerciseTemplate.sets.map { _ in SetRecord() }
 					workoutRecord.exercises.last?.sets.append(contentsOf: sets)
 				}
 			}

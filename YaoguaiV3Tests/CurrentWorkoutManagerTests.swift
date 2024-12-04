@@ -148,7 +148,13 @@ import Foundation
 		exerciseRecord.sets[0].value = Measurement(value: 1.0, unit: .kilograms)
 		exerciseRecord.sets[0].reps = 1
 		exerciseRecord.sets[0].rpe = 1
-		exerciseRecord.sets[0].toggleComplete()
+		
+		guard let category = exerciseRecord.details?.category else {
+			Issue.record("No category.")
+			return
+		}
+		
+		exerciseRecord.sets[0].toggleComplete(for: category)
 		
 		currentWorkoutManager.currentWorkout?.exercises.append(exerciseRecord)
 		
@@ -198,7 +204,13 @@ import Foundation
 		exerciseRecord.sets[0].value = Measurement(value: 1.0, unit: .kilograms)
 		exerciseRecord.sets[0].reps = 1
 		exerciseRecord.sets[0].rpe = 1
-		exerciseRecord.sets[0].toggleComplete()
+		
+		guard let category = exerciseRecord.details?.category else {
+			Issue.record("No category.")
+			return
+		}
+		
+		exerciseRecord.sets[0].toggleComplete(for:category)
 		currentWorkoutManager.currentWorkout?.exercises.append(exerciseRecord)
 		
 		currentWorkoutManager.cancel()

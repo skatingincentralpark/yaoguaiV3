@@ -58,100 +58,55 @@ struct SetEditor<T: SetCommon>: View {
 				Group {
 					switch exercise.category {
 					case .weightAndReps:
-						VStack {
-							//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(
-								value: $set.value,
-								index: fieldIndexes[safe: 0] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
-						VStack {
-							//							Text("\(set.repsString) reps")
-							SimpleTextFieldV2(
-								value: $set.reps,
-								index: fieldIndexes[safe: 1] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
-						VStack {
-							//							Text("\(set.rpeString) rpe")
-							SimpleTextFieldV2(
-								value: $set.rpe,
-								index: fieldIndexes[safe: 2] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
+						UnitMassTextField(
+							value: $set.value,
+							index: fieldIndexes[safe: 0] ?? -1,
+							focusedField: $focusedField
+						)
+						SimpleTextFieldV2(
+							value: $set.reps,
+							index: fieldIndexes[safe: 1] ?? -1,
+							focusedField: $focusedField
+						)
+						SimpleTextFieldV2(
+							value: $set.rpe,
+							index: fieldIndexes[safe: 2] ?? -1,
+							focusedField: $focusedField
+						)
 					case .distanceAndWeight:
-						VStack {
-							//							Text(set.distanceString)
-							UnitLengthTextField(
-								value: $set.distance,
-								index: fieldIndexes[safe: 0] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
-						VStack {
-							//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(
-								value: $set.value,
-								index: fieldIndexes[safe: 1] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
+						UnitLengthTextField(
+							value: $set.distance,
+							index: fieldIndexes[safe: 0] ?? -1,
+							focusedField: $focusedField
+						)
+						UnitMassTextField(
+							value: $set.value,
+							index: fieldIndexes[safe: 1] ?? -1,
+							focusedField: $focusedField
+						)
 					case .duration:
-						VStack {
-							//							Text(set.durationString)
-							TimeIntervalPicker(
-								timeInterval: $set.duration,
-								index: fieldIndexes[safe: 0] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
+						TimeIntervalPicker(
+							timeInterval: $set.duration,
+							index: fieldIndexes[safe: 0] ?? -1,
+							focusedField: $focusedField
+						)
 					case .durationAndWeight:
-						VStack {
-							//							Text(set.durationString)
-							TimeIntervalPicker(
-								timeInterval: $set.duration,
-								index: fieldIndexes[safe: 0] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
-						VStack {
-							//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(
-								value: $set.value,
-								index: fieldIndexes[safe: 1] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
+						TimeIntervalPicker(
+							timeInterval: $set.duration,
+							index: fieldIndexes[safe: 0] ?? -1,
+							focusedField: $focusedField
+						)
+						UnitMassTextField(
+							value: $set.value,
+							index: fieldIndexes[safe: 1] ?? -1,
+							focusedField: $focusedField
+						)
 					case .reps:
-						VStack {
-							//							Text("\(set.repsString) reps")
-							SimpleTextFieldV2(
-								value: $set.reps,
-								index: fieldIndexes[safe: 0] ?? -1,
-								focusedField: $focusedField
-							)
-							.overlay(alignment: .trailing) {
-							}
-						}
+						SimpleTextFieldV2(
+							value: $set.reps,
+							index: fieldIndexes[safe: 0] ?? -1,
+							focusedField: $focusedField
+						)
 					}
 				}
 				

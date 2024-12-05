@@ -27,8 +27,8 @@ struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 	@Binding var value: V?
 	var id: Int = UUID().hashValue
 	let index: Int
-	
-	@FocusState private var focused: Bool
+	@FocusState.Binding var focusedField: Int?
+	var focused: Bool { focusedField == index }
 	
 	var body: some View {
 		SimpleTextFieldImpl(
@@ -36,7 +36,7 @@ struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 			id: id,
 			keyboardHeight: 300
 		)
-		.focused($focused)
+		.focused($focusedField, equals: index)
 		.frame(width: 70, height: 30)
 		.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))
 		.clipShape(RoundedRectangle(cornerRadius: 6))
@@ -53,8 +53,16 @@ struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 	}
 }
 
+struct SimpleTextFieldV2Preview: View {
+	@FocusState var focusedField: Int?
+	
+	var body: some View {
+		SimpleTextFieldV2(value: .constant(1.0), index: 0, focusedField: $focusedField)
+	}
+}
+
 #Preview("Default") {
-	SimpleTextFieldV2(value: .constant(1.0), index: 0)
+	SimpleTextFieldV2Preview()
 }
 
 struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessStringConvertible {

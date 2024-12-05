@@ -10,6 +10,7 @@ import SwiftUI
 struct UnitLengthTextField: View {
 	@Binding var value: Measurement<UnitLength>?
 	let index: Int
+	@FocusState.Binding var focusedField: Int?
 	
 	var body: some View {
 		SimpleTextFieldV2(
@@ -22,7 +23,8 @@ struct UnitLengthTextField: View {
 				}
 			),
 			id: UUID().hashValue,
-			index: index
+			index: index,
+			focusedField: $focusedField
 		)
 	}
 	

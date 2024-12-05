@@ -68,6 +68,12 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	// Compute a mapping of SetRecord IDs to their input field indexes
 	@State private var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
 	
+	@FocusState var focusedField: Int?
+	/// Total number of fields
+	var totalFields: Int {
+		fieldIndexMapping.values.flatMap { $0 }.count
+	}
+	
 	init(
 		workout: T,
 		modelContext: ModelContext,
@@ -82,6 +88,12 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	}
 	
 	var body: some View {
+		VStack(alignment: .trailing) {
+			Text("Focused Index: \(focusedField ?? -1)")
+			Text("Total Fields: \(totalFields)")
+		}
+		.frame(maxWidth: .infinity, alignment: .trailing)
+		
 		ReorderableForEach(
 			renderedExercises,
 			active: $currentlyDragged
@@ -97,7 +109,8 @@ struct ExerciseList<T: WorkoutCommon>: View {
 							renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
 							modelContext: modelContext,
 							fieldIndexMapping: fieldIndexMapping,
-							updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
+							updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
+							focusedField: $focusedField
 						)
 					}
 				case .group(let group):
@@ -110,7 +123,8 @@ struct ExerciseList<T: WorkoutCommon>: View {
 								renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
 								modelContext: modelContext,
 								fieldIndexMapping: fieldIndexMapping,
-								updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
+								updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
+								focusedField: $focusedField
 							)
 						}
 					}

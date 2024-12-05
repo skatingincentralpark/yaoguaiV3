@@ -10,6 +10,7 @@ import SwiftUI
 struct UnitMassTextField: View {
 	@Binding var value: Measurement<UnitMass>?
 	let index: Int
+	@FocusState.Binding var focusedField: Int?
 	
     var body: some View {
 		SimpleTextFieldV2(
@@ -22,7 +23,8 @@ struct UnitMassTextField: View {
 				}
 			),
 			id: UUID().hashValue,
-			index: index
+			index: index,
+			focusedField: $focusedField
 		)
     }
 	
@@ -45,7 +47,15 @@ struct UnitMassTextField: View {
 	}
 }
 
-#Preview(traits: .sizeThatFitsLayout) {
+struct UnitMassTextFieldPreview: View {
 	let m = Measurement<UnitMass>(value: 20.0, unit: .kilograms)
-	UnitMassTextField(value: .constant(m), index: 0)
+	@FocusState var focusedField: Int?
+	
+	var body: some View {
+		UnitMassTextField(value: .constant(m), index: 0, focusedField: $focusedField)
+	}
+}
+
+#Preview(traits: .sizeThatFitsLayout) {
+	UnitMassTextFieldPreview()
 }

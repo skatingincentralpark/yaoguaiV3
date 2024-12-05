@@ -6,22 +6,24 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct SetEditor<T: SetCommon>: View {
 	@Binding var set: T
 	let exercise: Exercise
 	let index: Int
 	var previousSet: SetRecord?
-	var fieldIndexes: [Int]
-	
 	var delete: (T) -> Void
+	var fieldIndexes: [Int]
+	@FocusState.Binding var focusedField: Int?
 	
 	init(
 		set: Binding<T>,
 		exercise: Exercise,
 		index: Int,
 		delete: @escaping (T) -> Void,
-		fieldIndexes: [Int]
+		fieldIndexes: [Int],
+		focusedField: FocusState<Int?>.Binding
 	) {
 		self._set = set
 		self.exercise = exercise
@@ -29,6 +31,7 @@ struct SetEditor<T: SetCommon>: View {
 		self.delete = delete
 		self.previousSet = exercise.latestRecord?.sets[safe: index]
 		self.fieldIndexes = fieldIndexes
+		self._focusedField = focusedField
 	}
 	
 	var body: some View {
@@ -56,62 +59,98 @@ struct SetEditor<T: SetCommon>: View {
 					switch exercise.category {
 					case .weightAndReps:
 						VStack {
-//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(value: $set.value, index: fieldIndexes[safe: 0] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
+							UnitMassTextField(
+								value: $set.value,
+								index: fieldIndexes[safe: 0] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 						VStack {
-//							Text("\(set.repsString) reps")
-							SimpleTextFieldV2(value: $set.reps, index: fieldIndexes[safe: 1] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text("\(set.repsString) reps")
+							SimpleTextFieldV2(
+								value: $set.reps,
+								index: fieldIndexes[safe: 1] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 						VStack {
-//							Text("\(set.rpeString) rpe")
-							SimpleTextFieldV2(value: $set.rpe, index: fieldIndexes[safe: 2] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text("\(set.rpeString) rpe")
+							SimpleTextFieldV2(
+								value: $set.rpe,
+								index: fieldIndexes[safe: 2] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 					case .distanceAndWeight:
 						VStack {
-//							Text(set.distanceString)
-							UnitLengthTextField(value: $set.distance, index: fieldIndexes[safe: 0] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text(set.distanceString)
+							UnitLengthTextField(
+								value: $set.distance,
+								index: fieldIndexes[safe: 0] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 						VStack {
-//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(value: $set.value, index: fieldIndexes[safe: 1] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
+							UnitMassTextField(
+								value: $set.value,
+								index: fieldIndexes[safe: 1] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 					case .duration:
 						VStack {
-//							Text(set.durationString)
-							TimeIntervalPicker(timeInterval: $set.duration, index: fieldIndexes[safe: 0] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text(set.durationString)
+							TimeIntervalPicker(
+								timeInterval: $set.duration,
+								index: fieldIndexes[safe: 0] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 					case .durationAndWeight:
 						VStack {
-//							Text(set.durationString)
-							TimeIntervalPicker(timeInterval: $set.duration, index: fieldIndexes[safe: 0] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text(set.durationString)
+							TimeIntervalPicker(
+								timeInterval: $set.duration,
+								index: fieldIndexes[safe: 0] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 						VStack {
-//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(value: $set.value, index: fieldIndexes[safe: 1] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
+							UnitMassTextField(
+								value: $set.value,
+								index: fieldIndexes[safe: 1] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 					case .reps:
 						VStack {
-//							Text("\(set.repsString) reps")
-							SimpleTextFieldV2(value: $set.reps, index: fieldIndexes[safe: 0] ?? -1)
-								.overlay(alignment: .trailing) {
-								}
+							//							Text("\(set.repsString) reps")
+							SimpleTextFieldV2(
+								value: $set.reps,
+								index: fieldIndexes[safe: 0] ?? -1,
+								focusedField: $focusedField
+							)
+							.overlay(alignment: .trailing) {
+							}
 						}
 					}
 				}
@@ -162,30 +201,42 @@ struct CompleteToggleView: View {
 	}
 }
 
-#Preview(traits: .sizeThatFitsLayout) {
-	do {
-		let (container, _) = try setupPreview()
-		
-		let workout = getWorkoutRecord(container.mainContext)
-		
-		container.mainContext.insert(workout)
-		
-		let exercise = workout.exercises[0]
+struct SetEditorPreview: View {
+	var container: ModelContainer
+	var exercise: ExerciseRecord
+	var fieldIndexMapping: [WorkoutRecord.ExerciseType.SetType.ID: [Int]] = [:]
+	@FocusState var focusedField: Int?
+	
+	init() {
+		do {
+			let (container, _) = try setupPreview()
+			let workout = getWorkoutRecord(container.mainContext)
+			let exercise = workout.exercises[0]
+			container.mainContext.insert(workout)
 			
+			self.container = container
+			self.exercise = exercise
+		} catch {
+			fatalError("Something went wrong creating preview")
+		}
+	}
+	
+	var body: some View {
 		if let details = exercise.details {
-			return SetEditor(
+			SetEditor(
 				set: .constant(exercise.sets[0]),
 				exercise: details,
 				index: 0,
 				delete: { _ in },
-				fieldIndexes: []
+				fieldIndexes: [],
+				focusedField: $focusedField
 			)
 			.modelContainer(container)
-		} else {
-			return Text("No Details.")
 		}
-	}  catch {
-		return Text("Failed to build preview")
 	}
+}
+
+#Preview(traits: .sizeThatFitsLayout) {
+	SetEditorPreview()
 }
 

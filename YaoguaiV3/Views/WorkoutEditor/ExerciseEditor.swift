@@ -16,7 +16,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 	var renderExercises: () -> Void
 	var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]]
 	let updateFieldIndexMapping: () -> Void
-
+	@FocusState.Binding var focusedField: Int?
 	
 	@State private var replaceExerciseSheetPresented = false
 	
@@ -27,7 +27,8 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 		renderExercises: @escaping () -> Void,
 		modelContext: ModelContext,
 		fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]],
-		updateFieldIndexMapping: @escaping () -> Void
+		updateFieldIndexMapping: @escaping () -> Void,
+		focusedField: FocusState<Int?>.Binding
 	) {
 		self.workout = workout
 		self.exercise = exercise
@@ -36,6 +37,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 		self.modelContext = modelContext
 		self.fieldIndexMapping = fieldIndexMapping
 		self.updateFieldIndexMapping = updateFieldIndexMapping
+		self._focusedField = focusedField
 	}
 	
 	var body: some View {
@@ -100,7 +102,8 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 										exercise.removeSet(set.wrappedValue)
 										updateFieldIndexMapping()
 									},
-									fieldIndexes: fieldIndexMapping[set.id] ?? []
+									fieldIndexes: fieldIndexMapping[set.id] ?? [],
+									focusedField: $focusedField
 								)
 							}
 						}
@@ -121,26 +124,42 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 	}
 }
 
-#Preview(traits: .sizeThatFitsLayout) {
-	do {
-		let (container, _) = try setupPreview()
-		let workout = getWorkoutRecord(container.mainContext)
-		container.mainContext.insert(workout)
-		var fieldIndexMapping: [WorkoutRecord.ExerciseType.SetType.ID: [Int]] = [:]
-		
-		return ExerciseEditor(
+struct ExerciseEditorPreview: View {
+	var container: ModelContainer
+	var workout: WorkoutRecord
+	var fieldIndexMapping: [WorkoutRecord.ExerciseType.SetType.ID: [Int]] = [:]
+	@FocusState var focusedField: Int?
+	
+	init() {
+		do {
+			let (container, _) = try setupPreview()
+			let workout = getWorkoutRecord(container.mainContext)
+			container.mainContext.insert(workout)
+			
+			self.container = container
+			self.workout = workout
+		} catch {
+			fatalError("Something went wrong creating preview")
+		}
+	}
+	
+	var body: some View {
+		ExerciseEditor(
 			workout: workout,
 			exercise: workout.exercises[0],
 			exerciseToAddToSupersetGroup: .constant(nil),
 			renderExercises: {},
 			modelContext: container.mainContext,
 			fieldIndexMapping: fieldIndexMapping,
-			updateFieldIndexMapping: {}
+			updateFieldIndexMapping: {},
+			focusedField: $focusedField
 		)
 		.modelContainer(container)
 		.padding()
-	}  catch {
-		return Text("Failed to build preview")
 	}
+}
+
+#Preview(traits: .sizeThatFitsLayout) {
+	ExerciseEditorPreview()
 }
 

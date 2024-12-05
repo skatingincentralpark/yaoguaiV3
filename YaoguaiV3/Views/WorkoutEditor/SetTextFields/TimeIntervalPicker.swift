@@ -9,6 +9,7 @@ import SwiftUI
 
 struct TimeIntervalPicker: View {
 	@Binding var timeInterval: TimeInterval?
+	let index: Int
 
     var body: some View {
 		SimpleTextFieldV2(
@@ -22,7 +23,8 @@ struct TimeIntervalPicker: View {
 					}
 				}
 			),
-			id: UUID().hashValue
+			id: UUID().hashValue,
+			index: index
 		)
     }
 	

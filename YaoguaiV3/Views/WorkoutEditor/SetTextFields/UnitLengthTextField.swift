@@ -9,6 +9,7 @@ import SwiftUI
 
 struct UnitLengthTextField: View {
 	@Binding var value: Measurement<UnitLength>?
+	let index: Int
 	
 	var body: some View {
 		SimpleTextFieldV2(
@@ -20,7 +21,8 @@ struct UnitLengthTextField: View {
 					value = measurementFromDouble(newValue)
 				}
 			),
-			id: UUID().hashValue
+			id: UUID().hashValue,
+			index: index
 		)
 	}
 	

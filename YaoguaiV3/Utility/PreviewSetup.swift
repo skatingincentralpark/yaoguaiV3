@@ -25,22 +25,29 @@ func setupPreview(noInitialData: Bool = false) throws -> (ModelContainer, Curren
 
 func getWorkoutRecord(_ context: ModelContext) -> WorkoutRecord {
 	let pullups = Exercise(name: "Pullups", category: .weightAndReps)
-	let pushups = Exercise(name: "Pushups", category: .weightAndReps)
-	let militaryPress = Exercise(name: "Military Press", category: .weightAndReps)
-	let farmersCarries = Exercise(name: "Farmers Carries", category: .durationAndWeight)
+	let pushups = Exercise(name: "Pushups", category: .reps)
+	let plank = Exercise(name: "Plank", category: .duration)
+	let deadhang = Exercise(name: "Farmers Carries", category: .durationAndWeight)
+	let farmersCarries = Exercise(name: "Farmers Carries", category: .distanceAndWeight)
+	
 	context.insert(pullups)
 	context.insert(pushups)
+	context.insert(plank)
+	context.insert(deadhang)
+	context.insert(farmersCarries)
 	
 	let record1 = WorkoutRecord(name: "Upper")
 	record1.addExercise(details: pullups)
 	record1.addExercise(details: pushups)
-	record1.addExercise(details: militaryPress)
+	record1.addExercise(details: plank)
+	record1.addExercise(details: deadhang)
 	record1.addExercise(details: farmersCarries)
 	
 	record1.exercises[0].addSet()
 	record1.exercises[1].addSet()
 	record1.exercises[2].addSet()
 	record1.exercises[3].addSet()
+	record1.exercises[4].addSet()
 	
 	return record1
 }

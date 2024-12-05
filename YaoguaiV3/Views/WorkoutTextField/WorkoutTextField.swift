@@ -26,6 +26,7 @@ class PaddedTextField: UITextField {
 struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 	@Binding var value: V?
 	var id: Int = UUID().hashValue
+	let index: Int
 	
 	@FocusState private var focused: Bool
 	
@@ -43,11 +44,17 @@ struct SimpleTextFieldV2<V>: View where V: Numeric & LosslessStringConvertible {
 			RoundedRectangle(cornerRadius: 6)
 				.stroke(focused ? .green : .clear, lineWidth: 2.0)
 		}
+		.overlay(alignment: .trailing) {
+			Text("\(index)")
+				.padding(.horizontal, 5)
+				.foregroundColor(.blue)
+				.opacity(0.7)
+		}
 	}
 }
 
 #Preview("Default") {
-	SimpleTextFieldV2(value: .constant(1.0))
+	SimpleTextFieldV2(value: .constant(1.0), index: 0)
 }
 
 struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessStringConvertible {

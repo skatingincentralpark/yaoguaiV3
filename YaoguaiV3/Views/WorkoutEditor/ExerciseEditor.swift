@@ -14,6 +14,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 	@Binding var exerciseToAddToSupersetGroup: T.ExerciseType?
 	let modelContext: ModelContext
 	var renderExercises: () -> Void
+	var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]]
 	
 	@State private var replaceExerciseSheetPresented = false
 	
@@ -22,13 +23,15 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 		exercise: T.ExerciseType,
 		exerciseToAddToSupersetGroup: Binding<T.ExerciseType?>,
 		renderExercises: @escaping () -> Void,
-		modelContext: ModelContext
+		modelContext: ModelContext,
+		fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]]
 	) {
 		self.workout = workout
 		self.exercise = exercise
 		self._exerciseToAddToSupersetGroup = exerciseToAddToSupersetGroup
 		self.renderExercises = renderExercises
 		self.modelContext = modelContext
+		self.fieldIndexMapping = fieldIndexMapping
 	}
 	
 	var body: some View {
@@ -88,7 +91,8 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 									index: index,
 									delete: { _ in
 										exercise.removeSet(set.wrappedValue)
-									}
+									},
+									fieldIndexes: fieldIndexMapping[set.id] ?? []
 								)
 							}
 						}
@@ -114,13 +118,15 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 		let (container, _) = try setupPreview()
 		let workout = getWorkoutRecord(container.mainContext)
 		container.mainContext.insert(workout)
+		var fieldIndexMapping: [WorkoutRecord.ExerciseType.SetType.ID: [Int]] = [:]
 		
 		return ExerciseEditor(
 			workout: workout,
 			exercise: workout.exercises[0],
 			exerciseToAddToSupersetGroup: .constant(nil),
 			renderExercises: {},
-			modelContext: container.mainContext
+			modelContext: container.mainContext,
+			fieldIndexMapping: fieldIndexMapping
 		)
 		.modelContainer(container)
 		.padding()

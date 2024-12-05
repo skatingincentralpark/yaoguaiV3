@@ -9,6 +9,7 @@ import SwiftUI
 
 struct UnitMassTextField: View {
 	@Binding var value: Measurement<UnitMass>?
+	let index: Int
 	
     var body: some View {
 		SimpleTextFieldV2(
@@ -20,7 +21,8 @@ struct UnitMassTextField: View {
 					value = measurementFromDouble(newValue)
 				}
 			),
-			id: UUID().hashValue
+			id: UUID().hashValue,
+			index: index
 		)
     }
 	
@@ -45,5 +47,5 @@ struct UnitMassTextField: View {
 
 #Preview(traits: .sizeThatFitsLayout) {
 	let m = Measurement<UnitMass>(value: 20.0, unit: .kilograms)
-	UnitMassTextField(value: .constant(m))
+	UnitMassTextField(value: .constant(m), index: 0)
 }

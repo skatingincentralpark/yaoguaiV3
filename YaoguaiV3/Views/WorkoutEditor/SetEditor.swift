@@ -12,6 +12,7 @@ struct SetEditor<T: SetCommon>: View {
 	let exercise: Exercise
 	let index: Int
 	var previousSet: SetRecord?
+	var fieldIndexes: [Int]
 	
 	var delete: (T) -> Void
 	
@@ -19,13 +20,15 @@ struct SetEditor<T: SetCommon>: View {
 		set: Binding<T>,
 		exercise: Exercise,
 		index: Int,
-		delete: @escaping (T) -> Void
+		delete: @escaping (T) -> Void,
+		fieldIndexes: [Int]
 	) {
 		self._set = set
 		self.exercise = exercise
 		self.index = index
 		self.delete = delete
 		self.previousSet = exercise.latestRecord?.sets[safe: index]
+		self.fieldIndexes = fieldIndexes
 	}
 	
 	var body: some View {
@@ -54,43 +57,61 @@ struct SetEditor<T: SetCommon>: View {
 					case .weightAndReps:
 						VStack {
 //							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(value: $set.value)
+							UnitMassTextField(value: $set.value, index: fieldIndexes[safe: 0] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 						VStack {
 //							Text("\(set.repsString) reps")
-							SimpleTextFieldV2(value: $set.reps)
+							SimpleTextFieldV2(value: $set.reps, index: fieldIndexes[safe: 1] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 						VStack {
 //							Text("\(set.rpeString) rpe")
-							SimpleTextFieldV2(value: $set.rpe)
+							SimpleTextFieldV2(value: $set.rpe, index: fieldIndexes[safe: 2] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 					case .distanceAndWeight:
 						VStack {
 //							Text(set.distanceString)
-							UnitLengthTextField(value: $set.distance)
+							UnitLengthTextField(value: $set.distance, index: fieldIndexes[safe: 0] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 						VStack {
 //							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(value: $set.value)
+							UnitMassTextField(value: $set.value, index: fieldIndexes[safe: 1] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 					case .duration:
 						VStack {
 //							Text(set.durationString)
-							TimeIntervalPicker(timeInterval: $set.duration)
+							TimeIntervalPicker(timeInterval: $set.duration, index: fieldIndexes[safe: 0] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 					case .durationAndWeight:
 						VStack {
 //							Text(set.durationString)
-							TimeIntervalPicker(timeInterval: $set.duration)
+							TimeIntervalPicker(timeInterval: $set.duration, index: fieldIndexes[safe: 0] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 						VStack {
 //							Text("\(set.valueString) \(set.value?.unit.symbol ?? "")")
-							UnitMassTextField(value: $set.value)
+							UnitMassTextField(value: $set.value, index: fieldIndexes[safe: 1] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 					case .reps:
 						VStack {
 //							Text("\(set.repsString) reps")
-							SimpleTextFieldV2(value: $set.reps)
+							SimpleTextFieldV2(value: $set.reps, index: fieldIndexes[safe: 0] ?? -1)
+								.overlay(alignment: .trailing) {
+								}
 						}
 					}
 				}
@@ -156,7 +177,8 @@ struct CompleteToggleView: View {
 				set: .constant(exercise.sets[0]),
 				exercise: details,
 				index: 0,
-				delete: { _ in }
+				delete: { _ in },
+				fieldIndexes: []
 			)
 			.modelContainer(container)
 		} else {

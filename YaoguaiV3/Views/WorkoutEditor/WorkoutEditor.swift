@@ -65,6 +65,9 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	@Binding var renderedExercises: [SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>]
 	@State var exerciseToAddToSupersetGroup: T.ExerciseType?
 	
+	// Compute a mapping of SetRecord IDs to their input field indexes
+	@State private var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
+	
 	init(
 		workout: T,
 		modelContext: ModelContext,
@@ -75,6 +78,7 @@ struct ExerciseList<T: WorkoutCommon>: View {
 		self.modelContext = modelContext
 		self._currentlyDragged = currentlyDragged
 		self._renderedExercises = renderedExercises
+		self._fieldIndexMapping = .init(initialValue: updateFieldIndexMapping())
 	}
 	
 	var body: some View {
@@ -93,7 +97,8 @@ struct ExerciseList<T: WorkoutCommon>: View {
 							renderExercises: {
 								renderedExercises = workout.exercises.makeItemsToRender()
 							},
-							modelContext: modelContext
+							modelContext: modelContext,
+							fieldIndexMapping: fieldIndexMapping
 						)
 					}
 				case .group(let group):
@@ -106,7 +111,8 @@ struct ExerciseList<T: WorkoutCommon>: View {
 								renderExercises: {
 									renderedExercises = workout.exercises.makeItemsToRender()
 								},
-								modelContext: modelContext
+								modelContext: modelContext,
+								fieldIndexMapping: fieldIndexMapping
 							)
 						}
 					}
@@ -154,6 +160,50 @@ struct ExerciseList<T: WorkoutCommon>: View {
 			renderedExercises = s
 		}
 	}
+	
+	// Computes the field index mapping
+	func updateFieldIndexMapping() -> [T.ExerciseType.SetType.ID: [Int]] {
+		var index = 0
+		var mapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
+		
+		for exercise in workout.exercises.sorted() {
+			for set in exercise.sets {
+				var indexes: [Int] = []
+				
+				func appendAndIncrement() {
+					indexes.append(index); index += 1
+				}
+				
+				// appendAndIncrement depending on how many focusable inputs there are
+				if let category = exercise.details?.category {
+					switch category {
+					case .weightAndReps:
+						appendAndIncrement()
+						appendAndIncrement()
+						appendAndIncrement()
+						
+					case .distanceAndWeight:
+						appendAndIncrement()
+						appendAndIncrement()
+						
+					case .duration:
+						appendAndIncrement()
+						
+					case .durationAndWeight:
+						appendAndIncrement()
+						appendAndIncrement()
+						
+					case .reps:
+						appendAndIncrement()
+					}
+				}
+				
+				mapping[set.id] = indexes
+			}
+		}
+		
+		return mapping
+	}
 }
 
 struct AddGroupSheetView<T: ExerciseCommon>: View {
@@ -171,7 +221,7 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 		VStack(alignment: .leading) {
 			Text("Add \(exercise.details?.name ?? "") to:")
 				.font(.title3.bold())
-				
+			
 			ForEach(filteredItemsToRender) { renderedExercise in
 				VStack(alignment: .leading) {
 					switch renderedExercise {

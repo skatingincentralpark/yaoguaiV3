@@ -78,7 +78,7 @@ struct ExerciseList<T: WorkoutCommon>: View {
 		self.modelContext = modelContext
 		self._currentlyDragged = currentlyDragged
 		self._renderedExercises = renderedExercises
-		self._fieldIndexMapping = .init(initialValue: updateFieldIndexMapping())
+		self._fieldIndexMapping = .init(initialValue: getFieldIndexMapping())
 	}
 	
 	var body: some View {
@@ -94,11 +94,10 @@ struct ExerciseList<T: WorkoutCommon>: View {
 							workout: workout,
 							exercise: exercise,
 							exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
-							renderExercises: {
-								renderedExercises = workout.exercises.makeItemsToRender()
-							},
+							renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
 							modelContext: modelContext,
-							fieldIndexMapping: fieldIndexMapping
+							fieldIndexMapping: fieldIndexMapping,
+							updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
 						)
 					}
 				case .group(let group):
@@ -108,11 +107,10 @@ struct ExerciseList<T: WorkoutCommon>: View {
 								workout: workout,
 								exercise: exercise,
 								exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
-								renderExercises: {
-									renderedExercises = workout.exercises.makeItemsToRender()
-								},
+								renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
 								modelContext: modelContext,
-								fieldIndexMapping: fieldIndexMapping
+								fieldIndexMapping: fieldIndexMapping,
+								updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
 							)
 						}
 					}
@@ -124,14 +122,14 @@ struct ExerciseList<T: WorkoutCommon>: View {
 			.clipShape(RoundedRectangle(cornerRadius: 14))
 		} moveAction: { indices, newOffset in
 			moveAction(indices, newOffset)
+			fieldIndexMapping = getFieldIndexMapping()
 		}
 		.sheet(item: $exerciseToAddToSupersetGroup) { exercise in
 			AddGroupSheetView(
 				exercise: exercise,
 				itemsToRender: renderedExercises,
-				generateItemsToRender: {
-					renderedExercises = workout.exercises.makeItemsToRender()
-				}
+				generateItemsToRender: { renderedExercises = workout.exercises.makeItemsToRender() },
+				updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
 			)
 		}
 	}
@@ -162,7 +160,7 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	}
 	
 	// Computes the field index mapping
-	func updateFieldIndexMapping() -> [T.ExerciseType.SetType.ID: [Int]] {
+	func getFieldIndexMapping() -> [T.ExerciseType.SetType.ID: [Int]] {
 		var index = 0
 		var mapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
 		
@@ -210,7 +208,8 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 	@Environment(\.dismiss) var dismiss
 	var exercise: T
 	var itemsToRender: [SingleOrGroup<T, T.SupersetGroupType>]
-	var generateItemsToRender: () -> Void
+	let generateItemsToRender: () -> Void
+	let updateFieldIndexMapping: () -> Void
 	var filteredItemsToRender: [SingleOrGroup<T, T.SupersetGroupType>] {
 		itemsToRender.filter({ item in
 			item != .single(exercise)
@@ -231,6 +230,7 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 								exercise.addToNewGroup(with: targetExercise)
 								withAnimation {
 									generateItemsToRender()
+									updateFieldIndexMapping()
 								}
 								dismiss()
 							} label: {
@@ -244,6 +244,7 @@ struct AddGroupSheetView<T: ExerciseCommon>: View {
 							exercise.addToExistingGroup(group)
 							withAnimation {
 								generateItemsToRender()
+								updateFieldIndexMapping()
 							}
 							dismiss()
 						} label: {

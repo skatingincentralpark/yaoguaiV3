@@ -15,6 +15,8 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 	let modelContext: ModelContext
 	var renderExercises: () -> Void
 	var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]]
+	let updateFieldIndexMapping: () -> Void
+
 	
 	@State private var replaceExerciseSheetPresented = false
 	
@@ -24,7 +26,8 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 		exerciseToAddToSupersetGroup: Binding<T.ExerciseType?>,
 		renderExercises: @escaping () -> Void,
 		modelContext: ModelContext,
-		fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]]
+		fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]],
+		updateFieldIndexMapping: @escaping () -> Void
 	) {
 		self.workout = workout
 		self.exercise = exercise
@@ -32,6 +35,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 		self.renderExercises = renderExercises
 		self.modelContext = modelContext
 		self.fieldIndexMapping = fieldIndexMapping
+		self.updateFieldIndexMapping = updateFieldIndexMapping
 	}
 	
 	var body: some View {
@@ -44,6 +48,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 				
 				Button {
 					exercise.addSet()
+					updateFieldIndexMapping()
 				} label: {
 					Image(systemName: "plus.circle.fill")
 						.aspectRatio(1, contentMode: .fit)
@@ -64,6 +69,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 						Button("Remove From Superset") {
 							exercise.removeFromGroup(using: modelContext)
 							renderExercises()
+							updateFieldIndexMapping()
 						}
 					}
 					
@@ -71,6 +77,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 						workout.removeExercise(exercise)
 						modelContext.delete(exercise)
 						renderExercises()
+						updateFieldIndexMapping()
 					} label: {
 						Text("Remove From Workout")
 					}
@@ -91,6 +98,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 									index: index,
 									delete: { _ in
 										exercise.removeSet(set.wrappedValue)
+										updateFieldIndexMapping()
 									},
 									fieldIndexes: fieldIndexMapping[set.id] ?? []
 								)
@@ -126,7 +134,8 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 			exerciseToAddToSupersetGroup: .constant(nil),
 			renderExercises: {},
 			modelContext: container.mainContext,
-			fieldIndexMapping: fieldIndexMapping
+			fieldIndexMapping: fieldIndexMapping,
+			updateFieldIndexMapping: {}
 		)
 		.modelContainer(container)
 		.padding()

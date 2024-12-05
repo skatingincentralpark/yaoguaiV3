@@ -91,8 +91,31 @@ struct ExerciseList<T: WorkoutCommon>: View {
 		VStack(alignment: .trailing) {
 			Text("Focused Index: \(focusedField ?? -1)")
 			Text("Total Fields: \(totalFields)")
+			
+			HStack {
+				Spacer()
+				
+				Button("Prev") {
+					moveFocus(step: -1)
+				}
+				.disabled(focusedField == nil || focusedField == 0)
+				.buttonStyle(.bordered)
+				
+				Button("Next") {
+					moveFocus(step: 1)
+				}
+				.disabled(focusedField == nil || (focusedField ?? 0) >= totalFields - 1)
+				.buttonStyle(.bordered)
+				
+				Button("Done") {
+					focusedField = nil
+				}
+				.disabled(focusedField == nil)
+				.buttonStyle(.bordered)
+			}
 		}
 		.frame(maxWidth: .infinity, alignment: .trailing)
+		.padding(.bottom, 40)
 		
 		ReorderableForEach(
 			renderedExercises,
@@ -215,6 +238,15 @@ struct ExerciseList<T: WorkoutCommon>: View {
 		}
 		
 		return mapping
+	}
+	
+	/// Moves focus based on step
+	func moveFocus(step: Int) {
+		guard let current = focusedField else { return }
+		let newFocus = current + step
+		if newFocus >= 0 && newFocus < totalFields {
+			focusedField = newFocus
+		}
 	}
 }
 

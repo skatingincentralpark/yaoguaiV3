@@ -92,6 +92,67 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 			if exercise.sets.count > 0 {
 				HStack {
 					VStack(alignment: .leading) {
+						HStack {
+							if let category = exercise.details?.category {
+								switch category {
+								case .weightAndReps:
+									Text("Weight")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+									
+									Text("Reps")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+									
+									Text("RPE")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+								case .distanceAndWeight:
+									Text("Distance")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+									
+									Text("Weight")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+								case .duration:
+									Text("Duration")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+								case .durationAndWeight:
+									Text("Duration")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+									Text("Weight")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+								case .reps:
+									Text("Reps")
+										.frame(width: 70, alignment: .bottomLeading)
+										.lineLimit(1)
+										.bold()
+										.foregroundStyle(.secondary)
+								}
+							}
+						}
+						.padding(.bottom, 10)
+						
 						ForEach(Array($exercise.sets.enumerated()), id: \.1.id) { index, set in
 							if let details = exercise.details {
 								SetEditor(
@@ -134,8 +195,8 @@ struct ExerciseEditorPreview: View {
 		do {
 			let (container, _) = try setupPreview()
 			let workout = getWorkoutRecord(container.mainContext)
+			workout.exercises[0].addSet()
 			container.mainContext.insert(workout)
-			
 			self.container = container
 			self.workout = workout
 		} catch {

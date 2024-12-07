@@ -19,11 +19,13 @@ protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	init()
 	
 	func addExercise(details: Exercise)
-	func removeExercise(_ exercise: ExerciseType)
+	func removeExercise(_ exercise: ExerciseType, in context: ModelContext)
 }
 
 extension WorkoutCommon {
 	/// Such as adding a WorkoutRecord
+	/// So this declaritively inserts an ExerciseType object into the context
+	/// Remember, if autosave is off, this won't be saved unless we ask it to
 	func addExercise(details: Exercise) {
 		if exercises.contains(where: { $0.details?.id == details.id }) {
 			
@@ -43,8 +45,39 @@ extension WorkoutCommon {
 		exercises.append(exercise)
 	}
 	
-	func removeExercise(_ exercise: ExerciseType) {
+	/// This imperatively deletes the ExerciseType object from the context
+	/// Remember, if autosave is off, this won't be saved unless we ask it to
+	/// A lot of the logic in here is to ensure that references are removed immediately
+	/// This is to ensure functions like makeItemsToRender work as intended
+	/// However, if save is called, then this will happen automatically.
+	func removeExercise(
+		_ exercise: ExerciseType,
+		in context: ModelContext
+	) {
+		if let group = exercise.supersetGroup {
+			if shouldBreakSuperset(group) {
+				breakSuperset(group, in: context)
+			} else {
+				group.exercises.removeFirst { $0 == exercise }
+			}
+		}
+		
 		exercises.removeFirst { $0 == exercise }
+		context.delete(exercise)
+	}
+	
+	private func shouldBreakSuperset(_ group: Self.ExerciseType.SupersetGroupType) -> Bool {
+		return group.exercises.count == 2
+	}
+	
+	private func breakSuperset(_ group: Self.ExerciseType.SupersetGroupType, in context: ModelContext) {
+		context.delete(group)
+		
+		for exercise in group.exercises {
+			exercise.supersetGroup = nil
+		}
+		
+		group.exercises.removeAll()
 	}
 	
 	func updateOrderOfExercises() {
@@ -167,19 +200,19 @@ extension ExerciseCommon {
 	}
 	
 	func removeFromGroup(using modelContext: ModelContext) {
-		 guard let supersetGroup = self.supersetGroup else { return }
-		 
-		 if supersetGroup.exercises.count == 2 {
-			 // If there are only two exercises, clearing the group and deleting it
-			 supersetGroup.exercises = []
-			 modelContext.delete(supersetGroup)
-		 } else {
-			 // Otherwise, detach the exercise from the group
-			 self.supersetGroup = nil
-			 self.order = supersetGroup.order + supersetGroup.exercises.count
-			 self.workout?.updateOrderOfExercises()
-		 }
-	 }
+		guard let supersetGroup = self.supersetGroup else { return }
+		
+		if supersetGroup.exercises.count == 2 {
+			// If there are only two exercises, clearing the group and deleting it
+			supersetGroup.exercises = []
+			modelContext.delete(supersetGroup)
+		} else {
+			// Otherwise, detach the exercise from the group
+			self.supersetGroup = nil
+			self.order = supersetGroup.order + supersetGroup.exercises.count
+			self.workout?.updateOrderOfExercises()
+		}
+	}
 }
 
 protocol SetCommon: Identifiable, Codable, Equatable {

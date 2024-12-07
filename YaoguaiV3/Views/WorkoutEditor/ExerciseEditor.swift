@@ -46,6 +46,10 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 				Text(exercise.details?.name ?? "")
 					.bold()
 					.padding(.bottom, 10)
+				
+				if let group = exercise.supersetGroup {
+					Text("Is in a group")
+				}
 				Spacer()
 				
 				Button {
@@ -76,8 +80,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 					}
 					
 					Button(role: .destructive) {
-						workout.removeExercise(exercise)
-						modelContext.delete(exercise)
+						workout.removeExercise(exercise, in: modelContext)
 						renderExercises()
 						updateFieldIndexMapping()
 					} label: {

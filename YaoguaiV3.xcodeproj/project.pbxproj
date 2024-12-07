@@ -42,6 +42,7 @@
 		A1C5E76B2CAF4AE600C9B902 /* WorkoutRecordList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E76A2CAF4AE600C9B902 /* WorkoutRecordList.swift */; };
 		A1C5E7782CB39C4F00C9B902 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E7772CB39C4F00C9B902 /* Alert.swift */; };
 		A1C5E77C2CB39CA500C9B902 /* AlertList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E77B2CB39CA500C9B902 /* AlertList.swift */; };
+		A1C7B1F12D02D6910090DA91 /* WorkoutCommonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -92,6 +93,7 @@
 		A1C5E76A2CAF4AE600C9B902 /* WorkoutRecordList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutRecordList.swift; sourceTree = "<group>"; };
 		A1C5E7772CB39C4F00C9B902 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		A1C5E77B2CB39CA500C9B902 /* AlertList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertList.swift; sourceTree = "<group>"; };
+		A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCommonTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -217,6 +219,7 @@
 				A1802C3A2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift */,
 				A15AEC8D2CB53D6C00866739 /* WorkoutTemplateTests.swift */,
 				A1AC67942CF9A59200197140 /* ReorderingTests.swift */,
+				A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */,
 			);
 			path = YaoguaiV3Tests;
 			sourceTree = "<group>";
@@ -404,6 +407,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A1C7B1F12D02D6910090DA91 /* WorkoutCommonTests.swift in Sources */,
 				A1802C3B2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift in Sources */,
 				A1AC67952CF9A59200197140 /* ReorderingTests.swift in Sources */,
 				A15AEC8E2CB53D6C00866739 /* WorkoutTemplateTests.swift in Sources */,

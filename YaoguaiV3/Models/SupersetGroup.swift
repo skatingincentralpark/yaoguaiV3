@@ -50,6 +50,15 @@ enum SingleOrGroup<T: ExerciseCommon, U: SupersetGroupCommon>: Comparable, Ident
 	}
 }
 
+extension SingleOrGroup {
+	var isGroup: Bool {
+		if case .group = self {
+			return true
+		}
+		return false
+	}
+}
+
 extension Array where Element: ExerciseCommon, Element.SupersetGroupType.ExerciseType == Element {
 	func makeItemsToRender() -> [SingleOrGroup<Element, Element.SupersetGroupType>] {
 		var seenGroups = Set<Element.SupersetGroupType>() // Track seen superset groups

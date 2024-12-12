@@ -103,6 +103,7 @@ extension ExerciseDetailsEditor {
 			// Add an exercise.
 			let newExercise = Exercise(name: name, category: category)
 			modelContext.insert(newExercise)
+			try? modelContext.save()
 		}
 	}
 }

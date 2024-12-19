@@ -187,6 +187,8 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 		_ uiView: UIView,
 		context: Context
 	) {
+		context.coordinator.parent = self
+		
 		if let textField = uiView.subviews.first(where: { $0 is UITextField }) as? UITextField {
 			if let value = value {
 				// Convert the value to a Double
@@ -205,14 +207,14 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 	}
 	
 	func makeCoordinator() -> Coordinator {
-		Coordinator(value: $value)
+		Coordinator(self)
 	}
 	
 	class Coordinator: NSObject, UITextFieldDelegate {
-		var value: Binding<V?>
+		var parent: SimpleTextFieldImpl
 		
-		init(value: Binding<V?>) {
-			self.value = value
+		init(_ parent: SimpleTextFieldImpl) {
+			self.parent = parent
 		}
 		
 		@objc func buttonTapped(_ sender: UIButton) {
@@ -239,7 +241,7 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 			let newValue = text?.replacingCharacters(in: range, with: string)
 			
 			guard let newValue, !newValue.isEmpty else {
-				self.value.wrappedValue = nil
+				self.parent.value = nil
 				return true
 			}
 			
@@ -248,7 +250,7 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 			if let doubleValue = Double(newValue), doubleValue <= Double(Int.max), doubleValue >= Double(Int.min) {
 				// Update the bound value if within range
 				if let number = V(newValue) {
-					self.value.wrappedValue = number
+					self.parent.value = number
 					return true
 				}
 			}

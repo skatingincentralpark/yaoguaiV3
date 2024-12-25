@@ -10,7 +10,7 @@ import SwiftUI
 
 @MainActor
 struct CustomKeyboardFactory {
-	static private let keyboardHeight: CGFloat = 250
+	static private let keyboardHeight: CGFloat = 350
 	
 	static func createKeyboard(
 		onKeyPress: @escaping (String) -> Void,
@@ -21,23 +21,22 @@ struct CustomKeyboardFactory {
 			rootView: CustomKeyboard(
 				onKeyPress: onKeyPress,
 				onDelete: onDelete,
-				onDismiss: onDismiss
+				onDismiss: onDismiss,
+				keyboardHeight: keyboardHeight
 			)
 		)
 		
-		let inputView = UIInputView(frame: .zero, inputViewStyle: .keyboard)
-		inputView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+		let inputView = UIInputView(
+			frame: CGRect(origin: .zero, size: CGSize(width: UIScreen.main.bounds.width, height: keyboardHeight)),
+			inputViewStyle: .keyboard
+		)
 		
 		let keyboardView = keyboardController.view!
 		keyboardView.translatesAutoresizingMaskIntoConstraints = false
 		inputView.addSubview(keyboardView)
 		
 		NSLayoutConstraint.activate([
-			keyboardView.leadingAnchor.constraint(equalTo: inputView.leadingAnchor),
-			keyboardView.trailingAnchor.constraint(equalTo: inputView.trailingAnchor),
-			keyboardView.topAnchor.constraint(equalTo: inputView.topAnchor),
-			keyboardView.bottomAnchor.constraint(equalTo: inputView.bottomAnchor),
-			inputView.heightAnchor.constraint(equalToConstant: keyboardHeight) // Adjust as needed
+			keyboardView.widthAnchor.constraint(equalToConstant: inputView.frame.width)
 		])
 		
 		return inputView

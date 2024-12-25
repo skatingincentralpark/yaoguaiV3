@@ -13,7 +13,7 @@ struct UIKeyInputWrapped<T: AllowedNumeric>: UIViewRepresentable {
 	@Binding var value: T?
 	
 	// Keyboard size can be configured
-	private let keyboardHeight: CGFloat = 250
+	private let keyboardHeight: CGFloat = 300
 	
 	func makeUIView(context: Context) -> BarebonesUIKeyInput<T> {
 		let uiKeyInput = BarebonesUIKeyInput<T>(frame: .zero)

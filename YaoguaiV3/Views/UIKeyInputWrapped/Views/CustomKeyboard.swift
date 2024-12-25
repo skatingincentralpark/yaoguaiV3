@@ -12,6 +12,7 @@ struct CustomKeyboard: View {
 	let onKeyPress: (String) -> Void
 	let onDelete: () -> Void
 	let onDismiss: () -> Void
+	let keyboardHeight: CGFloat
 
 	var body: some View {
 		VStack(spacing: 16) {
@@ -93,13 +94,15 @@ struct CustomKeyboard: View {
 			}
 		}
 		.padding(16)
-		.background(Color(UIColor.systemBackground))
+		.frame(height: keyboardHeight)
+		.frame(maxWidth: .infinity)
+		.background(.secondary.opacity(0.2))
 	}
 }
 
 // MARK: - Preview
-struct CustomKeyboard_Previews: PreviewProvider {
-	static var previews: some View {
+struct CustomKeyboard_Preview: View {
+	var body: some View {
 		CustomKeyboard(
 			onKeyPress: { character in
 				print("Key Pressed:", character)
@@ -109,14 +112,13 @@ struct CustomKeyboard_Previews: PreviewProvider {
 			},
 			onDismiss: {
 				print("Dismiss pressed")
-			}
+			},
+			keyboardHeight: 250
 		)
 		.previewLayout(.sizeThatFits)
 	}
 }
 
 #Preview {
-    CustomKeyboard(
-		onKeyPress: { _ in }, onDelete: {}, onDismiss: {}
-	)
+	CustomKeyboard_Preview()
 }

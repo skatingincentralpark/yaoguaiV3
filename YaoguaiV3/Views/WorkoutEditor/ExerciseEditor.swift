@@ -47,7 +47,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 					.bold()
 					.padding(.bottom, 10)
 				
-				if let group = exercise.supersetGroup {
+				if let _ = exercise.supersetGroup {
 					Text("Is in a group")
 				}
 				Spacer()

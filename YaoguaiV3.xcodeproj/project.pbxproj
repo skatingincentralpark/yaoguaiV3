@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -95,6 +95,11 @@
 		A1C5E77B2CB39CA500C9B902 /* AlertList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertList.swift; sourceTree = "<group>"; };
 		A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCommonTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		A166A28A2D1B88B200107D8C /* UIKeyInputWrapped */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = UIKeyInputWrapped; sourceTree = "<group>"; };
+		A166A2962D1B88BC00107D8C /* UIKeyInputWrappedTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = UIKeyInputWrappedTests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		A11F266B2C3AA6CC00FD971E /* Frameworks */ = {
@@ -191,6 +196,7 @@
 		A1802C252C75479200272B66 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				A166A28A2D1B88B200107D8C /* UIKeyInputWrapped */,
 				A1C5E77D2CB3A0C800C9B902 /* Alert */,
 				A1802C262C7547A000272B66 /* WorkoutEditor */,
 				A1C5E7582CA7A1B100C9B902 /* ExerciseDetail */,
@@ -216,6 +222,7 @@
 		A1802C392C76A1F800272B66 /* YaoguaiV3Tests */ = {
 			isa = PBXGroup;
 			children = (
+				A166A2962D1B88BC00107D8C /* UIKeyInputWrappedTests */,
 				A1802C3A2C76A1F800272B66 /* CurrentWorkoutManagerTests.swift */,
 				A15AEC8D2CB53D6C00866739 /* WorkoutTemplateTests.swift */,
 				A1AC67942CF9A59200197140 /* ReorderingTests.swift */,
@@ -285,6 +292,9 @@
 			);
 			dependencies = (
 			);
+			fileSystemSynchronizedGroups = (
+				A166A28A2D1B88B200107D8C /* UIKeyInputWrapped */,
+			);
 			name = YaoguaiV3;
 			productName = YaoguaiV3;
 			productReference = A11F266E2C3AA6CC00FD971E /* YaoguaiV3.app */;
@@ -302,6 +312,9 @@
 			);
 			dependencies = (
 				A1802C3D2C76A1F800272B66 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				A166A2962D1B88BC00107D8C /* UIKeyInputWrappedTests */,
 			);
 			name = YaoguaiV3Tests;
 			productName = YaoguaiV3Tests;

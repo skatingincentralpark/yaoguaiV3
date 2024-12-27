@@ -25,22 +25,23 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 	}
 	
 	var body: some View {
-		ScrollView {
+		VStack(alignment: .leading) {
 			VStack(alignment: .leading) {
 				TextField("Name", text: $workout.name)
 				Button("Add Exercise") {
 					exerciseListSheetShown = true
 				}
-				ExerciseList(
-					workout: workout,
-					modelContext: modelContext,
-					currentlyDragged: $currentlyDragged,
-					renderedExercises: $renderedExercises
-				)
 			}
 			.padding()
-			.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+			
+			ExerciseList(
+				workout: workout,
+				modelContext: modelContext,
+				currentlyDragged: $currentlyDragged,
+				renderedExercises: $renderedExercises
+			)
 		}
+		.frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
 		.reorderableForEachContainer(active: $currentlyDragged)
 		.sheet(
 			isPresented: $exerciseListSheetShown,
@@ -88,86 +89,93 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	}
 	
 	var body: some View {
-		VStack(alignment: .trailing) {
-			Text("Focused Index: \(focusedField ?? -1)")
-			Text("Total Fields: \(totalFields)")
-			
-			HStack {
-				Spacer()
+		ScrollViewReader { value in
+			VStack(alignment: .trailing) {
+				Text("Focused Index: \(focusedField ?? -1)")
+				Text("Total Fields: \(totalFields)")
 				
-				Button("Prev") {
-					moveFocus(step: -1)
+				HStack {
+					Spacer()
+					
+					Button("Prev") {
+						moveFocus(step: -1, proxy: value)
+					}
+					.disabled(focusedField == nil || focusedField == 0)
+					.buttonStyle(.bordered)
+					
+					Button("Next") {
+						moveFocus(step: 1, proxy: value)
+					}
+					.disabled(focusedField == nil || (focusedField ?? 0) >= totalFields - 1)
+					.buttonStyle(.bordered)
+					
+					Button("Done") {
+						focusedField = nil
+					}
+					.disabled(focusedField == nil)
+					.buttonStyle(.bordered)
 				}
-				.disabled(focusedField == nil || focusedField == 0)
-				.buttonStyle(.bordered)
-				
-				Button("Next") {
-					moveFocus(step: 1)
-				}
-				.disabled(focusedField == nil || (focusedField ?? 0) >= totalFields - 1)
-				.buttonStyle(.bordered)
-				
-				Button("Done") {
-					focusedField = nil
-				}
-				.disabled(focusedField == nil)
-				.buttonStyle(.bordered)
 			}
-		}
-		.frame(maxWidth: .infinity, alignment: .trailing)
-		.padding(.bottom, 40)
-		
-		ReorderableForEach(
-			renderedExercises,
-			active: $currentlyDragged
-		) { renderedExercise in
-			VStack(alignment: .leading) {
-				switch renderedExercise {
-				case .single(let exercise):
-					VStack(alignment: .leading, spacing: 10) {
-						ExerciseEditor(
-							workout: workout,
+			.frame(maxWidth: .infinity, alignment: .trailing)
+			.padding()
+			
+			ScrollView {
+				VStack {
+					ReorderableForEach(
+						renderedExercises,
+						active: $currentlyDragged
+					) { renderedExercise in
+						VStack(alignment: .leading) {
+							switch renderedExercise {
+							case .single(let exercise):
+								VStack(alignment: .leading, spacing: 10) {
+									ExerciseEditor(
+										workout: workout,
+										exercise: exercise,
+										exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
+										renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
+										modelContext: modelContext,
+										fieldIndexMapping: fieldIndexMapping,
+										updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
+										focusedField: $focusedField
+									)
+								}
+							case .group(let group):
+								VStack(alignment: .leading, spacing: 10) {
+									ForEach(group.exercises.sorted()) { exercise in
+										ExerciseEditor(
+											workout: workout,
+											exercise: exercise,
+											exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
+											renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
+											modelContext: modelContext,
+											fieldIndexMapping: fieldIndexMapping,
+											updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
+											focusedField: $focusedField
+										)
+									}
+								}
+							}
+						}
+						.frame(maxWidth: .infinity, alignment: .leading)
+						.padding()
+						.background(.gray.opacity(0.2))
+						.clipShape(RoundedRectangle(cornerRadius: 14))
+					} moveAction: { indices, newOffset in
+						moveAction(indices, newOffset)
+						fieldIndexMapping = getFieldIndexMapping()
+					}
+					.sheet(item: $exerciseToAddToSupersetGroup) { exercise in
+						AddGroupSheetView(
 							exercise: exercise,
-							exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
-							renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
-							modelContext: modelContext,
-							fieldIndexMapping: fieldIndexMapping,
-							updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
-							focusedField: $focusedField
+							itemsToRender: renderedExercises,
+							generateItemsToRender: { renderedExercises = workout.exercises.makeItemsToRender() },
+							updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
 						)
 					}
-				case .group(let group):
-					VStack(alignment: .leading, spacing: 10) {
-						ForEach(group.exercises.sorted()) { exercise in
-							ExerciseEditor(
-								workout: workout,
-								exercise: exercise,
-								exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
-								renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
-								modelContext: modelContext,
-								fieldIndexMapping: fieldIndexMapping,
-								updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
-								focusedField: $focusedField
-							)
-						}
-					}
 				}
+				.padding()
 			}
-			.frame(maxWidth: .infinity, alignment: .leading)
-			.padding()
-			.background(.gray.opacity(0.2))
-			.clipShape(RoundedRectangle(cornerRadius: 14))
-		} moveAction: { indices, newOffset in
-			moveAction(indices, newOffset)
-			fieldIndexMapping = getFieldIndexMapping()
-		}
-		.sheet(item: $exerciseToAddToSupersetGroup) { exercise in
-			AddGroupSheetView(
-				exercise: exercise,
-				itemsToRender: renderedExercises,
-				generateItemsToRender: { renderedExercises = workout.exercises.makeItemsToRender() },
-				updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
-			)
 		}
 	}
 	
@@ -241,11 +249,16 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	}
 	
 	/// Moves focus based on step
-	func moveFocus(step: Int) {
+	func moveFocus(step: Int, proxy: ScrollViewProxy) {
 		guard let current = focusedField else { return }
 		let newFocus = current + step
 		if newFocus >= 0 && newFocus < totalFields {
 			focusedField = newFocus
+		}
+		Task { @MainActor in
+			withAnimation {
+				proxy.scrollTo("workoutKeyInput_\(newFocus)")
+			}
 		}
 	}
 }

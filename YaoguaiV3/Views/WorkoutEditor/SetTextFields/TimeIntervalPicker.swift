@@ -13,7 +13,7 @@ struct TimeIntervalPicker: View {
 	@FocusState.Binding var focusedField: Int?
 
     var body: some View {
-		SimpleTextFieldV2(
+		SimpleKeyInputV1(
 			value: Binding(
 				get: {
 					doubleFromTimeInterval(timeInterval)

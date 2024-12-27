@@ -63,12 +63,12 @@ struct SetEditor<T: SetCommon>: View {
 							index: fieldIndexes[safe: 0] ?? -1,
 							focusedField: $focusedField
 						)
-						SimpleTextFieldV2(
+						SimpleKeyInputV1(
 							value: $set.reps,
 							index: fieldIndexes[safe: 1] ?? -1,
 							focusedField: $focusedField
 						)
-						SimpleTextFieldV2(
+						SimpleKeyInputV1(
 							value: $set.rpe,
 							index: fieldIndexes[safe: 2] ?? -1,
 							focusedField: $focusedField
@@ -102,7 +102,7 @@ struct SetEditor<T: SetCommon>: View {
 							focusedField: $focusedField
 						)
 					case .reps:
-						SimpleTextFieldV2(
+						SimpleKeyInputV1(
 							value: $set.reps,
 							index: fieldIndexes[safe: 0] ?? -1,
 							focusedField: $focusedField

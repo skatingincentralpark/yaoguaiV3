@@ -58,7 +58,15 @@ struct Dashboard: View {
 						}
 					})
 					Button("Delete Exercise Details", role: .destructive) {
-						try? modelContext.delete(model: Exercise.self)
+						do {
+							let fetchRequest = FetchDescriptor<Exercise>()
+							let items = try modelContext.fetch(fetchRequest)
+							for item in items {
+								modelContext.delete(item) 
+							}
+						} catch {
+							print("Failed to delete exercise records: \(error)")
+						}
 					}
 					Button("Delete Workout Templates", role: .destructive) {
 						try? modelContext.delete(model: WorkoutTemplate.self)
@@ -112,6 +120,8 @@ struct Dashboard: View {
 		
 		modelContext.insert(pullups)
 		modelContext.insert(pushups)
+		
+		try? modelContext.save()
 	}
 }
 

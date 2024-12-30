@@ -29,8 +29,6 @@ class BarebonesUIKeyInput<T: AllowedNumeric>: UIControl, UIKeyInput {
 		set { _customInputView = newValue }
 	}
 	internal var hasText: Bool { !internalString.isEmpty }
-	internal let MAX_VALUE_INT = 9999
-	internal let MAX_VALUE_DOUBLE = 9999.999
 	
 	// MARK: - Init
 	
@@ -81,13 +79,7 @@ class BarebonesUIKeyInput<T: AllowedNumeric>: UIControl, UIKeyInput {
 			return
 		}
 		
-		// 3. Depending on T.numericMode, handle differently:
-		switch T.numericMode {
-		case .double:
-			insertForDouble(text)
-		case .int:
-			insertForInt(text)
-		}
+		insert(text)
 	}
 	
 	internal func deleteBackward() {
@@ -113,5 +105,13 @@ class BarebonesUIKeyInput<T: AllowedNumeric>: UIControl, UIKeyInput {
 	
 	public func getValue() -> T? {
 		currentValue
+	}
+	
+	public func increment() {
+		adjustValue(.increment)
+	}
+	
+	public func decrement() {
+		adjustValue(.decrement)
 	}
 }

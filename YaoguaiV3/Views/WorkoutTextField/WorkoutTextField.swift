@@ -70,6 +70,7 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 	var id: Int
 	var keyboardHeight: CGFloat
 	
+	
 	func makeUIView(context: Context) -> UIView {
 		let textField = PaddedTextField()
 		textField.layer.cornerRadius = 8.0
@@ -147,7 +148,8 @@ struct SimpleTextFieldImpl<V>: UIViewRepresentable where V: Numeric & LosslessSt
 					backgroundColor: .gray,
 					valueIsDouble: valueIsDouble,
 					minus: minus,
-					plus: plus
+					plus: plus,
+					next: {}
 				))
 			
 			let animalKeyboardView = AnimalKeyboardViewController.view!

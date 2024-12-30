@@ -13,7 +13,8 @@ struct UIKeyInputWrapped<T: AllowedNumeric>: UIViewRepresentable {
 	@Binding var value: T?
 	
 	// Keyboard size can be configured
-	private let keyboardHeight: CGFloat = 300
+	let keyboardHeight: CGFloat = 300
+	let next: () -> Void
 	
 	func makeUIView(context: Context) -> BarebonesUIKeyInput<T> {
 		let uiKeyInput = BarebonesUIKeyInput<T>(frame: .zero)
@@ -21,10 +22,18 @@ struct UIKeyInputWrapped<T: AllowedNumeric>: UIViewRepresentable {
 		// Set initial value
 		uiKeyInput.setValue(value)
 		
-		let inputView = CustomKeyboardFactory.createKeyboard(
-			onKeyPress: { uiKeyInput.insertText($0)},
-			onDelete: { uiKeyInput.deleteBackward() },
-			onDismiss: { _ = uiKeyInput.resignFirstResponder() }
+		let valueIsDouble = T("1") is Double
+		
+		let inputView = CustomKeyboardFactory.createKeyboardV2(
+			insertText: { uiKeyInput.insertText($0)},
+			deleteText: uiKeyInput.deleteBackward,
+			hideKeyboard: { _ = uiKeyInput.resignFirstResponder() },
+			keyboardHeight: 250,
+			backgroundColor: .brown,
+			valueIsDouble: valueIsDouble,
+			minus: uiKeyInput.decrement,
+			plus: uiKeyInput.increment,
+			next: next
 		)
 		
 		uiKeyInput.inputView = inputView
@@ -87,7 +96,7 @@ struct UIKeyInputWrapped_Preview: View {
 			}
 			.disabled(focused == nil)
 			HStack {
-				UIKeyInputWrapped(value: $str1)
+				UIKeyInputWrapped(value: $str1, next: {})
 					.frame(width: 80, height: 34)
 					.clipShape(RoundedRectangle(cornerRadius: 6))
 					.focused($focused, equals: 0)
@@ -103,7 +112,7 @@ struct UIKeyInputWrapped_Preview: View {
 				}
 			}
 			HStack {
-				UIKeyInputWrapped(value: $str2)
+				UIKeyInputWrapped(value: $str2, next: {})
 					.frame(width: 80, height: 34)
 					.clipShape(RoundedRectangle(cornerRadius: 6))
 					.focused($focused, equals: 1)

@@ -73,6 +73,36 @@ extension FormatterUtilities {
 		return true
 	}
 	
+	/// Checks for valid leading zeros in Int inputs.
+	/// - Returns: `true` if valid, `false` otherwise.
+	static func validateLeadingZeroForInt(_ string: String) -> Bool {
+		// Allow "0" only if it's the sole character
+		if string == "0" {
+			return true
+		}
+		
+		// Reject if string starts with '0' and has more characters
+		if string.hasPrefix("0") {
+			return false
+		}
+		
+		return true
+	}
+	
+	/// Checks for valid leading zeros in Double inputs.
+	/// - Returns: `true` if valid, `false` otherwise.
+	static func validateLeadingZeroForDouble(_ string: String) -> Bool {
+		if string.hasPrefix("0") {
+			if string.count == 1 {
+				return true // "0" is valid
+			}
+			let secondChar = string[string.index(after: string.startIndex)]
+			// Allow only if the second character is a decimal point
+			return secondChar == "."
+		}
+		return true
+	}
+	
 	/// Validates that the total length of the string does not exceed the specified maximum.
 	static func validateTotalLength(
 		maxLength: Int = ALLOWED_DIGITS_BEFORE_DECIMAL,

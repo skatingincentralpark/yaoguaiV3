@@ -6,6 +6,7 @@ struct WorkoutKeyboard: View {
 	let hideKeyboard: () -> Void
 	let minus: () -> Void
 	let plus: () -> Void
+	let next: () -> Void
 	let valueIsDouble: Bool
 	let keyboardHeight: CGFloat
 	let backgroundColor: Color
@@ -29,8 +30,9 @@ struct WorkoutKeyboard: View {
 		backgroundColor: Color,
 		spacing: CGFloat = 5,
 		valueIsDouble: Bool,
-		minus: @escaping () -> Void = {},
-		plus: @escaping () -> Void = {}
+		minus: @escaping () -> Void,
+		plus: @escaping () -> Void,
+		next: @escaping () -> Void
 	) {
 		self.insertText = insertText
 		self.deleteText = deleteText
@@ -41,6 +43,7 @@ struct WorkoutKeyboard: View {
 		self.valueIsDouble = valueIsDouble
 		self.minus = minus
 		self.plus = plus
+		self.next = next
 		self.rows = Array(repeating: GridItem(.flexible(minimum: 0, maximum: .infinity), spacing: spacing), count: 4)
 	}
 	
@@ -199,7 +202,10 @@ extension View {
 		hideKeyboard: { },
 		keyboardHeight: 300,
 		backgroundColor: Color.gray,
-		valueIsDouble: false
+		valueIsDouble: false,
+		minus: {},
+		plus: {},
+		next: {}
 	)
 }
 
@@ -210,6 +216,9 @@ extension View {
 		hideKeyboard: { },
 		keyboardHeight: 300,
 		backgroundColor: Color.gray,
-		valueIsDouble: true
+		valueIsDouble: true,
+		minus: {},
+		plus: {},
+		next: {}
 	)
 }

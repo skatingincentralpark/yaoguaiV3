@@ -41,5 +41,48 @@ struct CustomKeyboardFactory {
 		
 		return inputView
 	}
+	
+	static func createKeyboardV2(
+		insertText: @escaping (String) -> Void,
+		deleteText: @escaping () -> Void,
+		hideKeyboard: @escaping () -> Void,
+		keyboardHeight: CGFloat,
+		backgroundColor: Color,
+		spacing: CGFloat = 5,
+		valueIsDouble: Bool,
+		minus: @escaping () -> Void,
+		plus: @escaping () -> Void,
+		next: @escaping () -> Void
+	) -> UIInputView {
+		let keyboardController = UIHostingController(
+			rootView: WorkoutKeyboard(
+				insertText: insertText,
+				deleteText: deleteText,
+				hideKeyboard: hideKeyboard,
+				keyboardHeight: keyboardHeight,
+				backgroundColor: backgroundColor,
+				valueIsDouble: valueIsDouble,
+				minus: minus,
+				plus: plus,
+				next: next
+			)
+		)
+		
+		let inputView = UIInputView(
+			frame: CGRect(origin: .zero, size: CGSize(width: UIScreen.main.bounds.width, height: keyboardHeight)),
+			inputViewStyle: .keyboard
+		)
+		
+		let keyboardView = keyboardController.view!
+		keyboardView.translatesAutoresizingMaskIntoConstraints = false
+		inputView.addSubview(keyboardView)
+		
+		NSLayoutConstraint.activate([
+			keyboardView.widthAnchor.constraint(equalToConstant: inputView.frame.width)
+		])
+		
+		return inputView
+	}
+	
 }
 

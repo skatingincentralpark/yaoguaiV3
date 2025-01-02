@@ -59,13 +59,14 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 	}
 }
 
-struct ExerciseList<T: WorkoutCommon>: View {
+struct ExerciseList<T: WorkoutCommon>: View, KeyboardReadable {
 	@Bindable var workout: T
 	let modelContext: ModelContext
 	@Binding var currentlyDragged: SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>?
 	@Binding var renderedExercises: [SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>]
 	@State var exerciseToAddToSupersetGroup: T.ExerciseType?
 	
+	@State var keyboardIsVisible: Bool = false
 	@State var focusManager: FocusManager<T>
 	@FocusState var focusedField: Int?
 	
@@ -170,7 +171,7 @@ struct ExerciseList<T: WorkoutCommon>: View {
 				}
 				.padding()
 			}
-			.onChange(of: focusedField) { _, newValue in
+			.onChange(of: focusedField) { oldValue, newValue in
 				if focusManager.focusedField != newValue {
 					focusManager.focusedField = newValue
 					Task { @MainActor in
@@ -194,6 +195,21 @@ struct ExerciseList<T: WorkoutCommon>: View {
 					}
 				}
 			})
+			.onReceive(keyboardPublisher) { newIsKeyboardVisible in
+				guard keyboardIsVisible != newIsKeyboardVisible else { return }
+				
+				keyboardIsVisible = newIsKeyboardVisible
+				
+				if newIsKeyboardVisible {
+					Task { @MainActor in
+						withAnimation {
+							if let focusedField {
+								value.scrollTo("workoutKeyInput_\(focusedField)")
+							}
+						}
+					}
+				}
+			}
 			.environment(focusManager)
 		}
 	}

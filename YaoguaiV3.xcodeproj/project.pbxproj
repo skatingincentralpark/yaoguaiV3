@@ -44,6 +44,7 @@
 		A1C5E77C2CB39CA500C9B902 /* AlertList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E77B2CB39CA500C9B902 /* AlertList.swift */; };
 		A1C7B1F12D02D6910090DA91 /* WorkoutCommonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */; };
 		A1DA951C2D25EC1C00081F94 /* FocusManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DA951B2D25EC1C00081F94 /* FocusManager.swift */; };
+		A1DA955A2D26075100081F94 /* KeyboardReadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DA95592D26075100081F94 /* KeyboardReadable.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -96,6 +97,7 @@
 		A1C5E77B2CB39CA500C9B902 /* AlertList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertList.swift; sourceTree = "<group>"; };
 		A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCommonTests.swift; sourceTree = "<group>"; };
 		A1DA951B2D25EC1C00081F94 /* FocusManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusManager.swift; sourceTree = "<group>"; };
+		A1DA95592D26075100081F94 /* KeyboardReadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardReadable.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -176,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				A11F268B2C408B4600FD971E /* CurrentWorkoutManager.swift */,
+				A1DA95592D26075100081F94 /* KeyboardReadable.swift */,
 				A1DA951B2D25EC1C00081F94 /* FocusManager.swift */,
 				A13E110F2C979B7E0074BC49 /* PreviewSetup.swift */,
 				A1B555A52CD8DA9E00D48B9E /* ReorderableForEach.swift */,
@@ -389,6 +392,7 @@
 				A13E11062C90F73A0074BC49 /* Protocols.swift in Sources */,
 				A17A1A372C4D005B0053215E /* WorkoutKeyboard.swift in Sources */,
 				A19739352C4B2D6500356010 /* Array.swift in Sources */,
+				A1DA955A2D26075100081F94 /* KeyboardReadable.swift in Sources */,
 				A1B555A62CD8DA9E00D48B9E /* ReorderableForEach.swift in Sources */,
 				A13E110A2C93A7DD0074BC49 /* Exercise.swift in Sources */,
 				A1C5E74C2CA0235300C9B902 /* UnitMassTextField.swift in Sources */,

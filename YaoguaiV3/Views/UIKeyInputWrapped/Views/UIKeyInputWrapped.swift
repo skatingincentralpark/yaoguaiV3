@@ -14,7 +14,8 @@ struct UIKeyInputWrapped<T: AllowedNumeric>: UIViewRepresentable {
 	
 	// Keyboard size can be configured
 	let keyboardHeight: CGFloat = 300
-	let next: () -> Void
+	
+	@Environment(FocusManager<WorkoutRecord>.self) var focusManager
 	
 	func makeUIView(context: Context) -> BarebonesUIKeyInput<T> {
 		let uiKeyInput = BarebonesUIKeyInput<T>(frame: .zero)
@@ -33,7 +34,7 @@ struct UIKeyInputWrapped<T: AllowedNumeric>: UIViewRepresentable {
 			valueIsDouble: valueIsDouble,
 			minus: uiKeyInput.decrement,
 			plus: uiKeyInput.increment,
-			next: next
+			next: { focusManager.moveFocus(step: 1) }
 		)
 		
 		uiKeyInput.inputView = inputView
@@ -96,7 +97,7 @@ struct UIKeyInputWrapped_Preview: View {
 			}
 			.disabled(focused == nil)
 			HStack {
-				UIKeyInputWrapped(value: $str1, next: {})
+				UIKeyInputWrapped(value: $str1)
 					.frame(width: 80, height: 34)
 					.clipShape(RoundedRectangle(cornerRadius: 6))
 					.focused($focused, equals: 0)
@@ -112,7 +113,7 @@ struct UIKeyInputWrapped_Preview: View {
 				}
 			}
 			HStack {
-				UIKeyInputWrapped(value: $str2, next: {})
+				UIKeyInputWrapped(value: $str2)
 					.frame(width: 80, height: 34)
 					.clipShape(RoundedRectangle(cornerRadius: 6))
 					.focused($focused, equals: 1)

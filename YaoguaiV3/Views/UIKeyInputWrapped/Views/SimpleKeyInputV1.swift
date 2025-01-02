@@ -15,7 +15,7 @@ struct SimpleKeyInputV1<V>: View where V: AllowedNumeric {
 	var focused: Bool { focusedField == index }
 	
     var body: some View {
-		UIKeyInputWrapped(value: $value, next: { print("NOT IMPLEMENTED") })
+		UIKeyInputWrapped(value: $value)
 			.focused($focusedField, equals: index)
 			.frame(width: 70, height: 30)
 			.background(Color(red: 0, green: 0, blue: 0, opacity: 0.1))

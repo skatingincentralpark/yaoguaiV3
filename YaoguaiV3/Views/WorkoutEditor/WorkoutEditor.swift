@@ -66,14 +66,8 @@ struct ExerciseList<T: WorkoutCommon>: View {
 	@Binding var renderedExercises: [SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>]
 	@State var exerciseToAddToSupersetGroup: T.ExerciseType?
 	
-	// Compute a mapping of SetRecord IDs to their input field indexes
-	@State private var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
-	
+	@State var focusManager: FocusManager<T>
 	@FocusState var focusedField: Int?
-	/// Total number of fields
-	var totalFields: Int {
-		fieldIndexMapping.values.flatMap { $0 }.count
-	}
 	
 	init(
 		workout: T,
@@ -85,28 +79,28 @@ struct ExerciseList<T: WorkoutCommon>: View {
 		self.modelContext = modelContext
 		self._currentlyDragged = currentlyDragged
 		self._renderedExercises = renderedExercises
-		self._fieldIndexMapping = .init(initialValue: getFieldIndexMapping())
+		self._focusManager = .init(initialValue: FocusManager(workout: workout))
 	}
 	
 	var body: some View {
 		ScrollViewReader { value in
 			VStack(alignment: .trailing) {
 				Text("Focused Index: \(focusedField ?? -1)")
-				Text("Total Fields: \(totalFields)")
+				Text("Total Fields: \(focusManager.totalFields)")
 				
 				HStack {
 					Spacer()
 					
 					Button("Prev") {
-						moveFocus(step: -1, proxy: value)
+						focusManager.moveFocus(step: -1)
 					}
 					.disabled(focusedField == nil || focusedField == 0)
 					.buttonStyle(.bordered)
 					
 					Button("Next") {
-						moveFocus(step: 1, proxy: value)
+						focusManager.moveFocus(step: 1)
 					}
-					.disabled(focusedField == nil || (focusedField ?? 0) >= totalFields - 1)
+					.disabled(focusedField == nil || (focusedField ?? 0) >= focusManager.totalFields - 1)
 					.buttonStyle(.bordered)
 					
 					Button("Done") {
@@ -135,8 +129,8 @@ struct ExerciseList<T: WorkoutCommon>: View {
 										exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
 										renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
 										modelContext: modelContext,
-										fieldIndexMapping: fieldIndexMapping,
-										updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
+										fieldIndexMapping: focusManager.fieldIndexMapping,
+										updateFieldIndexMapping: { focusManager.fieldIndexMapping = focusManager.getFieldIndexMapping(workout) },
 										focusedField: $focusedField
 									)
 								}
@@ -149,8 +143,8 @@ struct ExerciseList<T: WorkoutCommon>: View {
 											exerciseToAddToSupersetGroup: $exerciseToAddToSupersetGroup,
 											renderExercises: { renderedExercises = workout.exercises.makeItemsToRender() },
 											modelContext: modelContext,
-											fieldIndexMapping: fieldIndexMapping,
-											updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() },
+											fieldIndexMapping: focusManager.fieldIndexMapping,
+											updateFieldIndexMapping: { focusManager.fieldIndexMapping = focusManager.getFieldIndexMapping(workout) },
 											focusedField: $focusedField
 										)
 									}
@@ -163,19 +157,44 @@ struct ExerciseList<T: WorkoutCommon>: View {
 						.clipShape(RoundedRectangle(cornerRadius: 14))
 					} moveAction: { indices, newOffset in
 						moveAction(indices, newOffset)
-						fieldIndexMapping = getFieldIndexMapping()
+						focusManager.fieldIndexMapping = focusManager.getFieldIndexMapping(workout)
 					}
 					.sheet(item: $exerciseToAddToSupersetGroup) { exercise in
 						AddGroupSheetView(
 							exercise: exercise,
 							itemsToRender: renderedExercises,
 							generateItemsToRender: { renderedExercises = workout.exercises.makeItemsToRender() },
-							updateFieldIndexMapping: { fieldIndexMapping = getFieldIndexMapping() }
+							updateFieldIndexMapping: { focusManager.fieldIndexMapping = focusManager.getFieldIndexMapping(workout) }
 						)
 					}
 				}
 				.padding()
 			}
+			.onChange(of: focusedField) { _, newValue in
+				if focusManager.focusedField != newValue {
+					focusManager.focusedField = newValue
+					Task { @MainActor in
+						withAnimation {
+							if let newValue {
+								value.scrollTo("workoutKeyInput_\(newValue)")
+							}
+						}
+					}
+				}
+			}
+			.onChange(of: focusManager.focusedField, { oldValue, newValue in
+				if focusedField != newValue {
+					focusedField = newValue
+					Task { @MainActor in
+						withAnimation {
+							if let newValue {
+								value.scrollTo("workoutKeyInput_\(newValue)")
+							}
+						}
+					}
+				}
+			})
+			.environment(focusManager)
 		}
 	}
 	
@@ -201,64 +220,6 @@ struct ExerciseList<T: WorkoutCommon>: View {
 		
 		withAnimation {
 			renderedExercises = s
-		}
-	}
-	
-	// Computes the field index mapping
-	func getFieldIndexMapping() -> [T.ExerciseType.SetType.ID: [Int]] {
-		var index = 0
-		var mapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
-		
-		for exercise in workout.exercises.sorted() {
-			for set in exercise.sets {
-				var indexes: [Int] = []
-				
-				func appendAndIncrement() {
-					indexes.append(index); index += 1
-				}
-				
-				// appendAndIncrement depending on how many focusable inputs there are
-				if let category = exercise.details?.category {
-					switch category {
-					case .weightAndReps:
-						appendAndIncrement()
-						appendAndIncrement()
-						appendAndIncrement()
-						
-					case .distanceAndWeight:
-						appendAndIncrement()
-						appendAndIncrement()
-						
-					case .duration:
-						appendAndIncrement()
-						
-					case .durationAndWeight:
-						appendAndIncrement()
-						appendAndIncrement()
-						
-					case .reps:
-						appendAndIncrement()
-					}
-				}
-				
-				mapping[set.id] = indexes
-			}
-		}
-		
-		return mapping
-	}
-	
-	/// Moves focus based on step
-	func moveFocus(step: Int, proxy: ScrollViewProxy) {
-		guard let current = focusedField else { return }
-		let newFocus = current + step
-		if newFocus >= 0 && newFocus < totalFields {
-			focusedField = newFocus
-		}
-		Task { @MainActor in
-			withAnimation {
-				proxy.scrollTo("workoutKeyInput_\(newFocus)")
-			}
 		}
 	}
 }

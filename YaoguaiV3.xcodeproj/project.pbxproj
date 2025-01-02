@@ -43,6 +43,7 @@
 		A1C5E7782CB39C4F00C9B902 /* Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E7772CB39C4F00C9B902 /* Alert.swift */; };
 		A1C5E77C2CB39CA500C9B902 /* AlertList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C5E77B2CB39CA500C9B902 /* AlertList.swift */; };
 		A1C7B1F12D02D6910090DA91 /* WorkoutCommonTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */; };
+		A1DA951C2D25EC1C00081F94 /* FocusManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1DA951B2D25EC1C00081F94 /* FocusManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +95,7 @@
 		A1C5E7772CB39C4F00C9B902 /* Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Alert.swift; sourceTree = "<group>"; };
 		A1C5E77B2CB39CA500C9B902 /* AlertList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertList.swift; sourceTree = "<group>"; };
 		A1C7B1F02D02D6910090DA91 /* WorkoutCommonTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkoutCommonTests.swift; sourceTree = "<group>"; };
+		A1DA951B2D25EC1C00081F94 /* FocusManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -174,6 +176,7 @@
 			isa = PBXGroup;
 			children = (
 				A11F268B2C408B4600FD971E /* CurrentWorkoutManager.swift */,
+				A1DA951B2D25EC1C00081F94 /* FocusManager.swift */,
 				A13E110F2C979B7E0074BC49 /* PreviewSetup.swift */,
 				A1B555A52CD8DA9E00D48B9E /* ReorderableForEach.swift */,
 			);
@@ -399,6 +402,7 @@
 				A11F26882C3E90D500FD971E /* Dashboard.swift in Sources */,
 				A1B728842CF46E290022EA42 /* SupersetGroup.swift in Sources */,
 				A1802C282C7547C700272B66 /* SetEditor.swift in Sources */,
+				A1DA951C2D25EC1C00081F94 /* FocusManager.swift in Sources */,
 				A1C5E7572CA7A19100C9B902 /* ExerciseDetailsEditor.swift in Sources */,
 				A1802C462C829DB500272B66 /* Collection.swift in Sources */,
 				A1802C2A2C7547DF00272B66 /* ExerciseEditor.swift in Sources */,

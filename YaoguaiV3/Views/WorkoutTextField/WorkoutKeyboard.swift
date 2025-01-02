@@ -112,7 +112,7 @@ struct WorkoutKeyboard: View {
 						.workoutKeyboardStyle()
 				})
 				
-				Button {} label: {
+				Button(action: next) {
 					Text("Next")
 						.frame(maxWidth: .infinity, maxHeight: .infinity)
 						.background(.orange)

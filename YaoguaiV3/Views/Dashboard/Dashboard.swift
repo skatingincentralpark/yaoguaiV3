@@ -116,10 +116,16 @@ struct Dashboard: View {
 	
 	func addDummyExercises() {
 		let pullups = Exercise(name: "Pullups", category: .weightAndReps)
-		let pushups = Exercise(name: "Pushups", category: .weightAndReps)
+		let sledPull = Exercise(name: "Sled Pull", category: .distanceAndWeight)
+		let run = Exercise(name: "Run", category: .duration)
+		let farmerCarries = Exercise(name: "Farmer Carries", category: .durationAndWeight)
+		let situps = Exercise(name: "Sit Ups", category: .reps)
 		
 		modelContext.insert(pullups)
-		modelContext.insert(pushups)
+		modelContext.insert(sledPull)
+		modelContext.insert(run)
+		modelContext.insert(farmerCarries)
+		modelContext.insert(situps)
 		
 		try? modelContext.save()
 	}

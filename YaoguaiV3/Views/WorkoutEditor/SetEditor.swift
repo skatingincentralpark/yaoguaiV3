@@ -8,20 +8,20 @@
 import SwiftUI
 import SwiftData
 
-struct SetEditor<T: SetCommon>: View {
-	@Binding var set: T
+struct SetEditor<S: SetCommon>: View {
+	@Binding var set: S
 	let exercise: Exercise
 	let index: Int
 	var previousSet: SetRecord?
-	var delete: (T) -> Void
+	var delete: (S) -> Void
 	var fieldIndexes: [Int]
 	@FocusState.Binding var focusedField: Int?
 	
 	init(
-		set: Binding<T>,
+		set: Binding<S>,
 		exercise: Exercise,
 		index: Int,
-		delete: @escaping (T) -> Void,
+		delete: @escaping (S) -> Void,
 		fieldIndexes: [Int],
 		focusedField: FocusState<Int?>.Binding
 	) {
@@ -41,12 +41,30 @@ struct SetEditor<T: SetCommon>: View {
 					set.reps = previousSet.reps
 					set.value = previousSet.value
 					set.rpe = previousSet.rpe
+					set.duration = previousSet.duration
+					set.distance = previousSet.distance
 				}
 			}, label: {
 				if let previousSet {
-					Text("\(previousSet.valueString) kg x \(previousSet.repsString)")
-						.font(.footnote)
-						.monospaced()
+					Group {
+						switch exercise.category {
+						case .weightAndReps:
+							Text("Weight and reps")
+							
+						case .distanceAndWeight:
+							Text("Distance and weight")
+							
+						case .duration:
+							Text("Duration")
+							
+						case .durationAndWeight:
+							Text("Duration and weight")
+							
+						case .reps:
+							Text("Reps")
+						}
+					}
+					.font(.footnote)
 				} else {
 					Text("No Previous Set ")
 						.font(.footnote)
@@ -136,7 +154,7 @@ struct SetEditor<T: SetCommon>: View {
 			// Here we manually update the set with the new value
 			var mutableSet = toggleableSet
 			mutableSet.toggleComplete(for: exercise.category)
-			set = mutableSet as! T // Cast back to T and assign to @Binding set
+			set = mutableSet as! S // Cast back to T and assign to @Binding set
 		})
 	}
 	

@@ -41,17 +41,18 @@ public struct ReorderableForEach<Item: Reorderable, Content: View, Preview: View
 		self.moveAction = moveAction
 	}
 	
-	@Binding
-	private var active: Item?
-
-	@State
-	private var hasChangedLocation = false
+	/// We'll only set the real active item when the user drags
+	@State private var activeCandidate: Item?
+	
+	@Binding private var active: Item?
+	
+	@State private var hasChangedLocation = false
 	
 	private let items: [Item]
 	private let content: (Item) -> Content
 	private let preview: ((Item) -> Preview)?
 	private let moveAction: (IndexSet, Int) -> Void
-
+	
 	public var body: some View {
 		ForEach(items) { item in
 			if let preview {
@@ -69,7 +70,7 @@ public struct ReorderableForEach<Item: Reorderable, Content: View, Preview: View
 			}
 		}
 	}
-
+	
 	private func contentView(for item: Item) -> some View {
 		content(item)
 			.opacity(active == item && hasChangedLocation ? 0.5 : 1)
@@ -78,6 +79,7 @@ public struct ReorderableForEach<Item: Reorderable, Content: View, Preview: View
 				delegate: ReorderableDragRelocateDelegate(
 					item: item,
 					items: items,
+					activeCandidate: $activeCandidate,
 					active: $active,
 					hasChangedLocation: $hasChangedLocation
 				) { from, to in
@@ -87,7 +89,7 @@ public struct ReorderableForEach<Item: Reorderable, Content: View, Preview: View
 	}
 	
 	private func dragData(for item: Item) -> NSItemProvider {
-		active = item
+		activeCandidate = item
 		return NSItemProvider(object: "\(item.id)" as NSString)
 	}
 }
@@ -97,11 +99,12 @@ struct ReorderableDragRelocateDelegate<Item: Reorderable>: DropDelegate {
 	let item: Item
 	var items: [Item]
 	
+	@Binding var activeCandidate: Item?
 	@Binding var active: Item?
 	@Binding var hasChangedLocation: Bool
-
+	
 	var moveAction: (IndexSet, Int) -> Void
-
+	
 	func dropEntered(info: DropInfo) {
 		guard item != active, let current = active else { return }
 		guard let from = items.firstIndex(of: current) else { return }
@@ -113,7 +116,8 @@ struct ReorderableDragRelocateDelegate<Item: Reorderable>: DropDelegate {
 	}
 	
 	func dropUpdated(info: DropInfo) -> DropProposal? {
-		DropProposal(operation: .move)
+		if activeCandidate != active { active = activeCandidate }
+		return DropProposal(operation: .move)
 	}
 	
 	func performDrop(info: DropInfo) -> Bool {
@@ -127,7 +131,7 @@ struct ReorderableDropOutsideDelegate<Item: Reorderable>: DropDelegate {
 	
 	@Binding
 	var active: Item?
-		
+	
 	func dropUpdated(info: DropInfo) -> DropProposal? {
 		DropProposal(operation: .move)
 	}

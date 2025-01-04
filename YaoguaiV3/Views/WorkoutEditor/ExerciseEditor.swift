@@ -46,10 +46,6 @@ struct ExerciseEditor<W: WorkoutCommon>: View {
 				Text(exercise.details?.name ?? "")
 					.bold()
 					.padding(.bottom, 10)
-				
-				if let _ = exercise.supersetGroup {
-					Text("Is in a group")
-				}
 
 				Spacer()
 				

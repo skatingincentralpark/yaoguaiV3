@@ -164,6 +164,7 @@ struct ExerciseList<W: WorkoutCommon>: View, KeyboardReadable {
 						.padding()
 						.background(.gray.opacity(0.2))
 						.clipShape(RoundedRectangle(cornerRadius: 14))
+						.contentShape(.dragPreview, RoundedRectangle(cornerRadius: 14))
 					} moveAction: { indices, newOffset in
 						moveAction(indices, newOffset)
 						focusManager.fieldIndexMapping = focusManager.getFieldIndexMapping(workout)

@@ -8,10 +8,10 @@
 import SwiftUI
 import SwiftData
 
-struct SetEditor<T: WorkoutCommon>: View {
-	typealias SetType = T.ExerciseType.SetType
+struct SetEditor<W: WorkoutCommon>: View {
+	typealias SetType = W.ExerciseType.SetType
 	
-	let workout: T
+	let workout: W
 	@Binding var set: SetType
 	let exercise: Exercise
 	let index: Int
@@ -21,7 +21,7 @@ struct SetEditor<T: WorkoutCommon>: View {
 	@FocusState.Binding var focusedField: Int?
 	
 	init(
-		workout: T,
+		workout: W,
 		set: Binding<SetType>,
 		exercise: Exercise,
 		index: Int,

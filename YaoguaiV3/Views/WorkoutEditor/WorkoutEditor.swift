@@ -8,15 +8,19 @@
 import SwiftUI
 import SwiftData
 
-struct WorkoutEditor<T: WorkoutCommon>: View {
-	@Bindable var workout: T
+struct WorkoutEditor<W: WorkoutCommon>: View {
+	typealias ExerciseType = W.ExerciseType
+	typealias SupersetGroupType = W.ExerciseType.SupersetGroupType
+	typealias SingleOrGroupType = SingleOrGroup<ExerciseType, SupersetGroupType>
+	
+	@Bindable var workout: W
 	let modelContext: ModelContext
 	@State private var exerciseListSheetShown = false
-	@State private var currentlyDragged: SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>?
-	@State var renderedExercises: [SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>] = []
+	@State private var currentlyDragged: SingleOrGroupType?
+	@State var renderedExercises: [SingleOrGroupType] = []
 	
 	init(
-		workout: T,
+		workout: W,
 		modelContext: ModelContext
 	) {
 		self.workout = workout
@@ -59,22 +63,26 @@ struct WorkoutEditor<T: WorkoutCommon>: View {
 	}
 }
 
-struct ExerciseList<T: WorkoutCommon>: View, KeyboardReadable {
-	@Bindable var workout: T
+struct ExerciseList<W: WorkoutCommon>: View, KeyboardReadable {
+	typealias ExerciseType = W.ExerciseType
+	typealias SupersetGroupType = W.ExerciseType.SupersetGroupType
+	typealias SingleOrGroupType = SingleOrGroup<ExerciseType, SupersetGroupType>
+	
+	@Bindable var workout: W
 	let modelContext: ModelContext
-	@Binding var currentlyDragged: SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>?
-	@Binding var renderedExercises: [SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>]
-	@State var exerciseToAddToSupersetGroup: T.ExerciseType?
+	@Binding var currentlyDragged: SingleOrGroupType?
+	@Binding var renderedExercises: [SingleOrGroupType]
+	@State var exerciseToAddToSupersetGroup: ExerciseType?
 	
 	@State var keyboardIsVisible: Bool = false
-	@State var focusManager: FocusManager<T>
+	@State var focusManager: FocusManager<W>
 	@FocusState var focusedField: Int?
 	
 	init(
-		workout: T,
+		workout: W,
 		modelContext: ModelContext,
-		currentlyDragged: Binding<SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>?>,
-		renderedExercises: Binding<[SingleOrGroup<T.ExerciseType, T.ExerciseType.SupersetGroupType>]>
+		currentlyDragged: Binding<SingleOrGroupType?>,
+		renderedExercises: Binding<[SingleOrGroupType]>
 	) {
 		self.workout = workout
 		self.modelContext = modelContext

@@ -10,7 +10,9 @@ import SwiftUI
 
 @Observable
 class FocusManager<T: WorkoutCommon> {
-	var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
+	typealias SetIdToFieldIndexMapping = [T.ExerciseType.SetType.ID: [Int]]
+	
+	var fieldIndexMapping: SetIdToFieldIndexMapping = [:]
 	
 	var focusedField: Int?
 	
@@ -34,9 +36,9 @@ class FocusManager<T: WorkoutCommon> {
 		}
 	}
 	
-	func getFieldIndexMapping(_ workout: T) -> [T.ExerciseType.SetType.ID: [Int]] {
+	func getFieldIndexMapping(_ workout: T) -> SetIdToFieldIndexMapping {
 		var index = 0
-		var mapping: [T.ExerciseType.SetType.ID: [Int]] = [:]
+		var mapping: SetIdToFieldIndexMapping = [:]
 		
 		for exercise in workout.exercises.sorted() {
 			for set in exercise.sets {

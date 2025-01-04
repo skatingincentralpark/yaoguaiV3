@@ -7,13 +7,15 @@
 
 import SwiftUI
 
-struct UnitLengthTextField: View {
+struct UnitLengthTextField<W: WorkoutCommon>: View {
+	let workout: W
 	@Binding var value: Measurement<UnitLength>?
 	let index: Int
 	@FocusState.Binding var focusedField: Int?
 	
 	var body: some View {
 		SimpleKeyInputV1(
+			workout: workout,
 			value: Binding(
 				get: {
 					doubleFromMeasurement(value)

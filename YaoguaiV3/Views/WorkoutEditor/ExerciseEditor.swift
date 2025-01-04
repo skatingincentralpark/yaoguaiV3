@@ -8,25 +8,25 @@
 import SwiftUI
 import SwiftData
 
-struct ExerciseEditor<T: WorkoutCommon>: View {
-	var workout: T
-	@Bindable var exercise: T.ExerciseType
-	@Binding var exerciseToAddToSupersetGroup: T.ExerciseType?
+struct ExerciseEditor<W: WorkoutCommon>: View {
+	let workout: W
+	@Bindable var exercise: W.ExerciseType
+	@Binding var exerciseToAddToSupersetGroup: W.ExerciseType?
 	let modelContext: ModelContext
 	var renderExercises: () -> Void
-	var fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]]
+	var fieldIndexMapping: [W.ExerciseType.SetType.ID: [Int]]
 	let updateFieldIndexMapping: () -> Void
 	@FocusState.Binding var focusedField: Int?
 	
 	@State private var replaceExerciseSheetPresented = false
 	
 	init(
-		workout: T,
-		exercise: T.ExerciseType,
-		exerciseToAddToSupersetGroup: Binding<T.ExerciseType?>,
+		workout: W,
+		exercise: W.ExerciseType,
+		exerciseToAddToSupersetGroup: Binding<W.ExerciseType?>,
 		renderExercises: @escaping () -> Void,
 		modelContext: ModelContext,
-		fieldIndexMapping: [T.ExerciseType.SetType.ID: [Int]],
+		fieldIndexMapping: [W.ExerciseType.SetType.ID: [Int]],
 		updateFieldIndexMapping: @escaping () -> Void,
 		focusedField: FocusState<Int?>.Binding
 	) {
@@ -50,6 +50,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 				if let _ = exercise.supersetGroup {
 					Text("Is in a group")
 				}
+
 				Spacer()
 				
 				Button {
@@ -159,6 +160,7 @@ struct ExerciseEditor<T: WorkoutCommon>: View {
 						ForEach(Array($exercise.sets.enumerated()), id: \.1.id) { index, set in
 							if let details = exercise.details {
 								SetEditor(
+									workout: workout,
 									set: set,
 									exercise: details,
 									index: index,

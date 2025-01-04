@@ -9,17 +9,33 @@ import Foundation
 import Observation
 import SwiftData
 
+enum WorkoutType { case record, template }
+
 protocol WorkoutCommon: Observable, AnyObject, Identifiable, PersistentModel {
 	associatedtype ExerciseType: ExerciseCommon where ExerciseType.SupersetGroupType.ExerciseType == ExerciseType
 	
 	var name: String { get set }
 	var created: Date { get set }
 	var exercises: [ExerciseType] { get set }
+	var type: WorkoutType { get }
 	
 	init()
 	
 	func addExercise(details: Exercise)
 	func removeExercise(_ exercise: ExerciseType, in context: ModelContext)
+}
+
+extension WorkoutCommon where Self == WorkoutRecord {
+	var type: WorkoutType { .record }
+}
+
+extension WorkoutCommon where Self == WorkoutTemplate {
+	var type: WorkoutType { .template }
+}
+
+extension WorkoutCommon {
+	var isTemplate: Bool { type == .template }
+	var isRecord: Bool { type == .record }
 }
 
 extension WorkoutCommon {

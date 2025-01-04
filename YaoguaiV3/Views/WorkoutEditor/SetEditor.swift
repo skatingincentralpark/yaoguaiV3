@@ -8,23 +8,28 @@
 import SwiftUI
 import SwiftData
 
-struct SetEditor<S: SetCommon>: View {
-	@Binding var set: S
+struct SetEditor<T: WorkoutCommon>: View {
+	typealias SetType = T.ExerciseType.SetType
+	
+	let workout: T
+	@Binding var set: SetType
 	let exercise: Exercise
 	let index: Int
 	var previousSet: SetRecord?
-	var delete: (S) -> Void
+	var delete: (SetType) -> Void
 	var fieldIndexes: [Int]
 	@FocusState.Binding var focusedField: Int?
 	
 	init(
-		set: Binding<S>,
+		workout: T,
+		set: Binding<SetType>,
 		exercise: Exercise,
 		index: Int,
-		delete: @escaping (S) -> Void,
+		delete: @escaping (SetType) -> Void,
 		fieldIndexes: [Int],
 		focusedField: FocusState<Int?>.Binding
 	) {
+		self.workout = workout
 		self._set = set
 		self.exercise = exercise
 		self.index = index
@@ -36,91 +41,102 @@ struct SetEditor<S: SetCommon>: View {
 	
 	var body: some View {
 		VStack(alignment: .leading) {
-			Button(action: {
-				if let previousSet {
-					set.reps = previousSet.reps
-					set.value = previousSet.value
-					set.rpe = previousSet.rpe
-					set.duration = previousSet.duration
-					set.distance = previousSet.distance
-				}
-			}, label: {
-				if let previousSet {
-					Group {
-						switch exercise.category {
-						case .weightAndReps:
-							Text("Weight and reps")
-							
-						case .distanceAndWeight:
-							Text("Distance and weight")
-							
-						case .duration:
-							Text("Duration")
-							
-						case .durationAndWeight:
-							Text("Duration and weight")
-							
-						case .reps:
-							Text("Reps")
-						}
+			if workout.isRecord {
+				Button(action: {
+					if let previousSet {
+						set.reps = previousSet.reps
+						set.value = previousSet.value
+						set.rpe = previousSet.rpe
+						set.duration = previousSet.duration
+						set.distance = previousSet.distance
 					}
-					.font(.footnote)
-				} else {
-					Text("No Previous Set ")
+				}, label: {
+					if previousSet != nil {
+						Group {
+							switch exercise.category {
+							case .weightAndReps:
+								Text("Weight and reps")
+								
+							case .distanceAndWeight:
+								Text("Distance and weight")
+								
+							case .duration:
+								Text("Duration")
+								
+							case .durationAndWeight:
+								Text("Duration and weight")
+								
+							case .reps:
+								Text("Reps")
+							}
+						}
 						.font(.footnote)
-						.disabled(true)
-				}
-			})
+					} else {
+						Text("No Previous Set ")
+							.font(.footnote)
+							.disabled(true)
+					}
+				})
+			}
 			
 			HStack {
 				Group {
 					switch exercise.category {
 					case .weightAndReps:
 						UnitMassTextField(
+							workout: workout,
 							value: $set.value,
 							index: fieldIndexes[safe: 0] ?? -1,
 							focusedField: $focusedField
 						)
 						SimpleKeyInputV1(
+							workout: workout,
 							value: $set.reps,
 							index: fieldIndexes[safe: 1] ?? -1,
 							focusedField: $focusedField
 						)
 						SimpleKeyInputV1(
+							workout: workout,
 							value: $set.rpe,
 							index: fieldIndexes[safe: 2] ?? -1,
 							focusedField: $focusedField
 						)
 					case .distanceAndWeight:
 						UnitLengthTextField(
+							workout: workout,
 							value: $set.distance,
 							index: fieldIndexes[safe: 0] ?? -1,
 							focusedField: $focusedField
 						)
 						UnitMassTextField(
+							workout: workout,
 							value: $set.value,
 							index: fieldIndexes[safe: 1] ?? -1,
 							focusedField: $focusedField
 						)
 					case .duration:
 						TimeIntervalPicker(
+							workout: workout,
 							timeInterval: $set.duration,
 							index: fieldIndexes[safe: 0] ?? -1,
 							focusedField: $focusedField
 						)
 					case .durationAndWeight:
 						TimeIntervalPicker(
+							workout: workout,
 							timeInterval: $set.duration,
 							index: fieldIndexes[safe: 0] ?? -1,
 							focusedField: $focusedField
 						)
 						UnitMassTextField(
+							workout: workout,
 							value: $set.value,
 							index: fieldIndexes[safe: 1] ?? -1,
 							focusedField: $focusedField
 						)
 					case .reps:
 						SimpleKeyInputV1(
+							workout: workout,
 							value: $set.reps,
 							index: fieldIndexes[safe: 0] ?? -1,
 							focusedField: $focusedField
@@ -154,7 +170,7 @@ struct SetEditor<S: SetCommon>: View {
 			// Here we manually update the set with the new value
 			var mutableSet = toggleableSet
 			mutableSet.toggleComplete(for: exercise.category)
-			set = mutableSet as! S // Cast back to T and assign to @Binding set
+			set = mutableSet as! SetType // Cast back to T and assign to @Binding set
 		})
 	}
 	
@@ -175,6 +191,7 @@ struct CompleteToggleView: View {
 }
 
 struct SetEditorPreview: View {
+	let workout: WorkoutRecord
 	var container: ModelContainer
 	var exercise: ExerciseRecord
 	var fieldIndexMapping: [WorkoutRecord.ExerciseType.SetType.ID: [Int]] = [:]
@@ -187,6 +204,7 @@ struct SetEditorPreview: View {
 			let exercise = workout.exercises[0]
 			container.mainContext.insert(workout)
 			
+			self.workout = workout
 			self.container = container
 			self.exercise = exercise
 		} catch {
@@ -196,7 +214,8 @@ struct SetEditorPreview: View {
 	
 	var body: some View {
 		if let details = exercise.details {
-			SetEditor(
+			SetEditor<WorkoutRecord>(
+				workout: workout,
 				set: .constant(exercise.sets[0]),
 				exercise: details,
 				index: 0,

@@ -8,14 +8,16 @@
 import Foundation
 import UIKit
 import SwiftUI
+import SwiftData
 
-struct UIKeyInputWrapped<T: AllowedNumeric>: UIViewRepresentable {
+struct UIKeyInputWrapped<T: AllowedNumeric, W: WorkoutCommon>: UIViewRepresentable {
+	let workout: W
 	@Binding var value: T?
 	
 	// Keyboard size can be configured
 	let keyboardHeight: CGFloat = 300
 	
-	@Environment(FocusManager<WorkoutRecord>.self) var focusManager
+	@Environment(FocusManager<W>.self) var focusManager
 	
 	func makeUIView(context: Context) -> BarebonesUIKeyInput<T> {
 		let uiKeyInput = BarebonesUIKeyInput<T>(frame: .zero)
@@ -82,6 +84,18 @@ struct UIKeyInputWrapped_Preview: View {
 	@State private var str1: Int? = 1234
 	@State private var str2: Double? = 3456789
 	@FocusState private var focused: Int?
+	let modelContainer: ModelContainer
+	let workout: WorkoutRecord
+	@State var focusManager: FocusManager<WorkoutRecord>
+	
+	init() {
+		do { modelContainer = try ModelContainer(for: WorkoutRecord.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true)) } catch { fatalError("Failed to create ModelContainer: \(error)") }
+		let new = WorkoutRecord()
+		modelContainer.mainContext.insert(new)
+		workout = new
+		let focusManager = FocusManager(workout: workout)
+		self.focusManager = focusManager
+	}
 	
 	var body: some View {
 		VStack(alignment: .leading, spacing: 5) {
@@ -97,7 +111,7 @@ struct UIKeyInputWrapped_Preview: View {
 			}
 			.disabled(focused == nil)
 			HStack {
-				UIKeyInputWrapped(value: $str1)
+				UIKeyInputWrapped(workout: workout, value: $str1)
 					.frame(width: 80, height: 34)
 					.clipShape(RoundedRectangle(cornerRadius: 6))
 					.focused($focused, equals: 0)
@@ -113,7 +127,7 @@ struct UIKeyInputWrapped_Preview: View {
 				}
 			}
 			HStack {
-				UIKeyInputWrapped(value: $str2)
+				UIKeyInputWrapped(workout: workout, value: $str2)
 					.frame(width: 80, height: 34)
 					.clipShape(RoundedRectangle(cornerRadius: 6))
 					.focused($focused, equals: 1)
@@ -131,6 +145,8 @@ struct UIKeyInputWrapped_Preview: View {
 		}
 		.frame(maxWidth: .infinity, alignment: .leading)
 		.padding()
+		.modelContainer(modelContainer)
+		.environment(focusManager)
 	}
 }
 

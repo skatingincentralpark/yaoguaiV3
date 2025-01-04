@@ -7,13 +7,15 @@
 
 import SwiftUI
 
-struct TimeIntervalPicker: View {
+struct TimeIntervalPicker<W: WorkoutCommon>: View {
+	let workout: W
 	@Binding var timeInterval: TimeInterval?
 	let index: Int
 	@FocusState.Binding var focusedField: Int?
 
     var body: some View {
 		SimpleKeyInputV1(
+			workout: workout,
 			value: Binding(
 				get: {
 					doubleFromTimeInterval(timeInterval)

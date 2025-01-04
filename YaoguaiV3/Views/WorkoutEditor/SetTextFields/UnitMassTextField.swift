@@ -7,13 +7,15 @@
 
 import SwiftUI
 
-struct UnitMassTextField: View {
+struct UnitMassTextField<W: WorkoutCommon>: View {
+	let workout: W
 	@Binding var value: Measurement<UnitMass>?
 	let index: Int
 	@FocusState.Binding var focusedField: Int?
 	
     var body: some View {
 		SimpleKeyInputV1(
+			workout: workout,
 			value: Binding(
 				get: {
 					doubleFromMeasurement(value)
@@ -47,15 +49,15 @@ struct UnitMassTextField: View {
 	}
 }
 
-struct UnitMassTextFieldPreview: View {
-	let m = Measurement<UnitMass>(value: 20.0, unit: .kilograms)
-	@FocusState var focusedField: Int?
-	
-	var body: some View {
-		UnitMassTextField(value: .constant(m), index: 0, focusedField: $focusedField)
-	}
-}
-
-#Preview(traits: .sizeThatFitsLayout) {
-	UnitMassTextFieldPreview()
-}
+//struct UnitMassTextFieldPreview: View {
+//	let m = Measurement<UnitMass>(value: 20.0, unit: .kilograms)
+//	@FocusState var focusedField: Int?
+//	
+//	var body: some View {
+//		UnitMassTextField(value: .constant(m), index: 0, focusedField: $focusedField)
+//	}
+//}
+//
+//#Preview(traits: .sizeThatFitsLayout) {
+//	UnitMassTextFieldPreview()
+//}

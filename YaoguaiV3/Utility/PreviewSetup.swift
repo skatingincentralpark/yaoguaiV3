@@ -27,7 +27,7 @@ func getWorkoutRecord(_ context: ModelContext) -> WorkoutRecord {
 	let pullups = Exercise(name: "Pullups", category: .weightAndReps)
 	let pushups = Exercise(name: "Pushups", category: .reps)
 	let plank = Exercise(name: "Plank", category: .duration)
-	let deadhang = Exercise(name: "Farmers Carries", category: .durationAndWeight)
+	let deadhang = Exercise(name: "Deadhang", category: .durationAndWeight)
 	let farmersCarries = Exercise(name: "Farmers Carries", category: .distanceAndWeight)
 	
 	context.insert(pullups)
@@ -44,6 +44,8 @@ func getWorkoutRecord(_ context: ModelContext) -> WorkoutRecord {
 	record1.addExercise(details: farmersCarries)
 	
 	record1.exercises[0].addSet()
+	record1.exercises[0].addSet()
+	record1.exercises[1].addSet()
 	record1.exercises[1].addSet()
 	record1.exercises[2].addSet()
 	record1.exercises[3].addSet()
